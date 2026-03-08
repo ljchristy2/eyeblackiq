@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EyeBlackIQ  |  Performance</title>
+  
+<style>
+  :root {
+    --bg:    #0D0D0D;
+    --text:  #F0EDE8;
+    --accent:#DC143C;
+    --data:  #4A90D9;
+    --gold:  #B8960C;
+    --card:  #1a1a1a;
+    --border:#2a2a2a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  header {
+    background: #0a0a0a;
+    border-bottom: 2px solid var(--accent);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  header h1 { font-size: 1.4rem; letter-spacing: .05em; color: var(--text); }
+  header .tagline { font-size: .8rem; color: #888; }
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: #111;
+    padding: 0 1rem;
+  }
+  .tab-btn {
+    padding: .7rem 1.2rem;
+    border: none;
+    background: transparent;
+    color: #888;
+    font-size: .9rem;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: .2s;
+  }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-panel { display: none; padding: 1.5rem; max-width: 960px; margin: 0 auto; }
+  .tab-panel.active { display: block; }
+  .pick-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.2rem;
+    margin-bottom: .8rem;
+  }
+  .pick-card.wheelhouse { border-left: 4px solid var(--accent); }
+  .pick-card.filthy     { border-left: 4px solid var(--data); }
+  .pick-card.ou         { border-left: 4px solid var(--gold); }
+  .pick-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: .4rem;
+  }
+  .tier-badge {
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    padding: .2rem .6rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+  .badge-wheelhouse { background: var(--accent); color: #fff; }
+  .badge-filthy     { background: var(--data);   color: #fff; }
+  .badge-ou         { background: var(--gold);   color: #000; }
+  .pick-bet  { font-size: 1.05rem; font-weight: 600; }
+  .pick-meta { font-size: .82rem; color: #aaa; margin-top: .3rem; }
+  .pick-meta span { margin-right: 1rem; }
+  .ev-pos { color: #4caf50; }
+  .ev-neg { color: var(--accent); }
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: .8rem;
+    margin-bottom: 1.5rem;
+  }
+  .kpi-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: .8rem 1rem;
+    text-align: center;
+  }
+  .kpi-val { font-size: 1.5rem; font-weight: 700; color: var(--accent); }
+  .kpi-lbl { font-size: .78rem; color: #888; margin-top: .2rem; }
+  .no-picks {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+    font-size: 1rem;
+  }
+  .section-hdr {
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #666;
+    margin: 1rem 0 .6rem;
+  }
+  footer {
+    text-align: center;
+    padding: 1.5rem;
+    font-size: .75rem;
+    color: #444;
+    border-top: 1px solid var(--border);
+  }
+  a { color: var(--data); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+</style>
+
+</head>
+<body>
+  <header>
+    <div>
+      <h1>EyeBlackIQ  ·  Performance</h1>
+      <div class="tagline">Season record through 2026-03-08</div>
+    </div>
+    <div><a href="index.html" style="font-size:.82rem">← Today's Picks</a></div>
+  </header>
+  <div style="padding:1.5rem;max-width:860px;margin:0 auto">
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-val">10</div>
+        <div class="kpi-lbl">Graded Picks</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-val">70.0%</div>
+        <div class="kpi-lbl">Win Rate</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-val" style="color:#4caf50">+2.38u</div>
+        <div class="kpi-lbl">Season P&amp;L</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-val">7-3</div>
+        <div class="kpi-lbl">Record</div>
+      </div>
+    </div>
+    <p style="color:#555;font-size:.82rem;margin-top:.5rem">
+      All picks graded at closing line. Units: Wheelhouse=2.0u · Filthy=1.5u · O/U=1.0u
+      &nbsp;·&nbsp; <a href="methodology.html">Full Methodology</a>
+    </p>
+  </div>
+  <footer>EyeBlackIQ &nbsp;·&nbsp; <a href="index.html">Today's Picks</a></footer>
+</body>
+</html>
