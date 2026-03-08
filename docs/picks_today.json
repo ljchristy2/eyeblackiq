@@ -1,0 +1,95 @@
+{
+  "date": "2026-03-08",
+  "generated_at": "2026-03-08T12:07:40",
+  "model_version": "v3",
+  "wheelhouse": [
+    {
+      "away": "Wright St Raiders",
+      "home": "Tennessee",
+      "bet": "Tennessee ML",
+      "wp": 0.9071,
+      "ev": 0.098,
+      "units": 2.0,
+      "away_ml": 325,
+      "home_ml": -475,
+      "pred_total": 11.79,
+      "ou_line": 13.0
+    },
+    {
+      "away": "UC San Diego",
+      "home": "Cincinnati",
+      "bet": "Cincinnati ML",
+      "wp": 0.9011,
+      "ev": 0.141,
+      "units": 2.0,
+      "away_ml": 270,
+      "home_ml": -375,
+      "pred_total": 10.9,
+      "ou_line": 14.5
+    },
+    {
+      "away": "Illinois",
+      "home": "Southern California",
+      "bet": "Southern California ML",
+      "wp": 0.8833,
+      "ev": 0.18,
+      "units": 2.0,
+      "away_ml": 220,
+      "home_ml": -298,
+      "pred_total": 10.42,
+      "ou_line": null
+    },
+    {
+      "away": "Michigan St Spartans",
+      "home": "Nebraska",
+      "bet": "Nebraska ML",
+      "wp": 0.8642,
+      "ev": 0.184,
+      "units": 2.0,
+      "away_ml": 200,
+      "home_ml": -270,
+      "pred_total": 11.86,
+      "ou_line": 11.5
+    },
+    {
+      "away": "Fresno St Bulldogs",
+      "home": "Arizona Wildcats",
+      "bet": "Arizona Wildcats ML",
+      "wp": 0.8134,
+      "ev": 0.265,
+      "units": 2.0,
+      "away_ml": 140,
+      "home_ml": -180,
+      "pred_total": 11.29,
+      "ou_line": null
+    },
+    {
+      "away": "Oregon",
+      "home": "Purdue",
+      "bet": "Oregon ML",
+      "wp": 0.7793,
+      "ev": 0.068,
+      "units": 2.0,
+      "away_ml": -270,
+      "home_ml": 200,
+      "pred_total": 11.17,
+      "ou_line": 14.5
+    },
+    {
+      "away": "Maryland",
+      "home": "Troy Trojans",
+      "bet": "Troy Trojans ML",
+      "wp": 0.7607,
+      "ev": 0.236,
+      "units": 2.0,
+      "away_ml": 124,
+      "home_ml": -160,
+      "pred_total": 11.51,
+      "ou_line": null
+    }
+  ],
+  "filthy": [],
+  "ou": [],
+  "pass_count": 24,
+  "total_games": 31
+}
