@@ -1,6 +1,6 @@
 {
   "date": "2026-03-08",
-  "generated_at": "2026-03-08T12:07:40",
+  "generated_at": "2026-03-08T12:34:18",
   "model_version": "v3",
   "wheelhouse": [
     {
@@ -89,7 +89,93 @@
     }
   ],
   "filthy": [],
+  "capped_filthy": [
+    {
+      "away": "Virginia Tech",
+      "home": "Georgia Tech",
+      "bet": "Georgia Tech ML",
+      "wp": 0.9522,
+      "ev": 0.043,
+      "units": 0.0,
+      "away_ml": 600,
+      "home_ml": -1050,
+      "pred_total": 15.7,
+      "ou_line": 15.0
+    },
+    {
+      "away": "North Florida Ospreys",
+      "home": "Alabama",
+      "bet": "Alabama ML",
+      "wp": 0.8832,
+      "ev": 0.035,
+      "units": 0.0,
+      "away_ml": 380,
+      "home_ml": -580,
+      "pred_total": 11.14,
+      "ou_line": 12.5
+    },
+    {
+      "away": "Louisiana Tech",
+      "home": "South Alabama",
+      "bet": "South Alabama ML",
+      "wp": 0.7483,
+      "ev": 0.497,
+      "units": 0.0,
+      "away_ml": -130,
+      "home_ml": 100,
+      "pred_total": 12.11,
+      "ou_line": null
+    },
+    {
+      "away": "Louisiana-Lafayette",
+      "home": "Dallas Baptist",
+      "bet": "Dallas Baptist ML",
+      "wp": 0.7326,
+      "ev": 0.296,
+      "units": 0.0,
+      "away_ml": 100,
+      "home_ml": -130,
+      "pred_total": 11.54,
+      "ou_line": null
+    },
+    {
+      "away": "East Carolina",
+      "home": "Coastal Carolina",
+      "bet": "Coastal Carolina ML",
+      "wp": 0.6726,
+      "ev": 0.078,
+      "units": 0.0,
+      "away_ml": 130,
+      "home_ml": -166,
+      "pred_total": 11.74,
+      "ou_line": 13.0
+    },
+    {
+      "away": "Notre Dame Fighting Irish",
+      "home": "Duke",
+      "bet": "Duke ML",
+      "wp": 0.6688,
+      "ev": 0.404,
+      "units": 0.0,
+      "away_ml": -140,
+      "home_ml": 110,
+      "pred_total": 11.25,
+      "ou_line": 13.5
+    },
+    {
+      "away": "UNC Wilmington Seahawks",
+      "home": "Jacksonville Dolphins",
+      "bet": "Jacksonville Dolphins ML",
+      "wp": 0.6643,
+      "ev": 0.462,
+      "units": 0.0,
+      "away_ml": -154,
+      "home_ml": 120,
+      "pred_total": 9.32,
+      "ou_line": 11.0
+    }
+  ],
   "ou": [],
-  "pass_count": 24,
+  "pass_count": 17,
   "total_games": 31
 }
