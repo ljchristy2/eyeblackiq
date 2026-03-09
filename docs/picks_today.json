@@ -1,47 +1,35 @@
 {
   "date": "2026-03-09",
-  "generated_at": "2026-03-09T07:38:01",
+  "generated_at": "2026-03-09T12:35:27",
   "model_version": "v3",
   "wheelhouse": [
     {
       "away": "Xavier",
       "home": "Oregon St Beavers",
       "bet": "Oregon St Beavers ML",
-      "wp": 0.8833,
-      "ev": 0.151,
+      "wp": 0.8487,
+      "ev": 0.106,
       "units": 2.0,
       "away_ml": 240,
       "home_ml": -330,
-      "pred_total": 11.9,
-      "ou_line": null
-    },
-    {
-      "away": "Pepperdine",
-      "home": "CSU Northridge Matadors",
-      "bet": "CSU Northridge Matadors ML",
-      "wp": 0.8481,
-      "ev": 0.174,
-      "units": 2.0,
-      "away_ml": 195,
-      "home_ml": -260,
-      "pred_total": 9.9,
+      "pred_total": 11.61,
       "ou_line": null
     }
   ],
   "filthy": [],
   "ou": [],
   "pod": {
-    "away": "Pepperdine",
-    "home": "CSU Northridge Matadors",
-    "bet": "CSU Northridge Matadors ML",
-    "wp": 0.8481,
-    "ev": 0.174,
+    "away": "Xavier",
+    "home": "Oregon St Beavers",
+    "bet": "Oregon St Beavers ML",
+    "wp": 0.8487,
+    "ev": 0.106,
     "units": 2.0,
-    "away_ml": 195,
-    "home_ml": -260,
-    "pred_total": 9.9,
+    "away_ml": 240,
+    "home_ml": -330,
+    "pred_total": 11.61,
     "ou_line": null
   },
-  "pass_count": 4,
+  "pass_count": 5,
   "total_games": 6
 }
