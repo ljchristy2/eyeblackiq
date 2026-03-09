@@ -1,999 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EyeBlackIQ | Performance</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EyeBlackIQ  |  Performance</title>
+  
 <style>
-/* ═══════════════════════════════════════════════════════
-   EYEBLACKIQ — PERFORMANCE PAGE
-   Python injection point: replace {{PERFORMANCE_DATA}}
-   in the <script> block below with json.dumps(stats)
-   ═══════════════════════════════════════════════════════ */
-
-:root {
-  --bg:          #0D0D0D;
-  --bg2:         #101010;
-  --accent:      #DC143C;
-  --accent-dim:  rgba(220,20,60,0.12);
-  --accent-glow: rgba(220,20,60,0.25);
-  --text:        #F0EDE8;
-  --text-dim:    #7A7672;
-  --text-mid:    #B0ADA8;
-  --data:        #4A90D9;
-  --gold:        #C4A020;
-  --gold-dim:    rgba(196,160,32,0.12);
-  --divider:     #1C1C1C;
-  --win:         #1A6B3C;
-  --win-bright:  #27AE60;
-  --loss:        #DC143C;
-  --push:        #555555;
-  --card-bg:     rgba(255,255,255,0.025);
-  --card-bdr:    rgba(255,255,255,0.07);
-  --wh:          #C4A020;
-  --fi:          #DC143C;
-  --ou:          #4A90D9;
-}
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Barlow', sans-serif;
-  min-height: 100vh;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-}
-
-/* ── GRAIN TEXTURE OVERLAY ── */
-body::before {
-  content: '';
-  position: fixed; inset: 0;
-  pointer-events: none; z-index: 9998;
-  opacity: 0.035;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 300px 300px;
-}
-
-/* ── SCANNING LINE ── */
-.scan-line {
-  position: fixed; left: 0; width: 100%; height: 1px;
-  background: linear-gradient(90deg, transparent 0%, var(--accent) 40%, var(--accent) 60%, transparent 100%);
-  opacity: 0.15; pointer-events: none; z-index: 9999;
-  animation: scan 12s linear infinite;
-  top: -1px;
-}
-@keyframes scan { from { top: -1px; } to { top: 100vh; } }
-
-/* ── LAYOUT ── */
-.wrap { max-width: 1240px; margin: 0 auto; padding: 0 28px; }
-
-/* ═══════════════════════════════
-   HEADER
-═══════════════════════════════ */
-header {
-  position: sticky; top: 0; z-index: 100;
-  background: rgba(13,13,13,0.94);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--divider);
-}
-.header-inner {
-  max-width: 1240px; margin: 0 auto; padding: 0 28px;
-  display: flex; align-items: center; justify-content: space-between;
-  height: 60px;
-}
-.logo {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.6rem; letter-spacing: 0.1em;
-  color: var(--text); text-decoration: none;
-  display: flex; align-items: center; gap: 2px;
-}
-.logo-iq { color: var(--accent); }
-.logo-dot {
-  width: 5px; height: 5px; border-radius: 50%;
-  background: var(--accent); margin: 0 2px;
-  animation: pulse-dot 2s ease-in-out infinite;
-}
-@keyframes pulse-dot {
-  0%,100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.7); }
-}
-
-.nav { display: flex; gap: 4px; align-items: center; }
-.nav-link {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.68rem; letter-spacing: 0.14em;
-  text-transform: uppercase; text-decoration: none;
-  color: var(--text-dim); padding: 6px 14px;
-  border: 1px solid transparent; border-radius: 3px;
-  transition: all 0.2s;
-}
-.nav-link:hover { color: var(--text); border-color: var(--card-bdr); }
-.nav-link.active {
-  color: var(--accent); border-color: rgba(220,20,60,0.4);
-  background: rgba(220,20,60,0.07);
-}
-
-/* ═══════════════════════════════
-   HERO
-═══════════════════════════════ */
-.hero {
-  padding: 52px 28px 36px;
-  max-width: 1240px; margin: 0 auto;
-  display: flex; justify-content: space-between; align-items: flex-end;
-  flex-wrap: wrap; gap: 16px;
-}
-.hero-left {}
-.hero-eyebrow {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.65rem; letter-spacing: 0.22em;
-  color: var(--accent); text-transform: uppercase; margin-bottom: 10px;
-  display: flex; align-items: center; gap: 8px;
-}
-.hero-eyebrow::before {
-  content: '';
-  display: inline-block; width: 24px; height: 1px; background: var(--accent);
-}
-.hero-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(3rem, 6vw, 5rem);
-  letter-spacing: 0.06em; line-height: 0.9;
-  color: var(--text);
-}
-.hero-title span { color: var(--accent); }
-.hero-meta {
-  margin-top: 14px;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.7rem; color: var(--text-dim);
-  letter-spacing: 0.08em;
-  display: flex; gap: 20px; flex-wrap: wrap;
-}
-.hero-meta-item { display: flex; align-items: center; gap: 6px; }
-.hero-meta-item .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--win-bright); }
-.hero-meta-item .dot.red { background: var(--accent); }
-
-.hero-right {
-  text-align: right;
-}
-.live-badge {
-  display: inline-flex; align-items: center; gap: 7px;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase;
-  color: var(--win-bright);
-  border: 1px solid rgba(39,174,96,0.3);
-  background: rgba(39,174,96,0.07);
-  padding: 6px 14px; border-radius: 3px;
-}
-.live-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--win-bright);
-  animation: pulse-dot 1.5s ease-in-out infinite;
-}
-
-/* ═══════════════════════════════
-   KPI STRIP
-═══════════════════════════════ */
-.kpi-strip {
-  max-width: 1240px; margin: 0 auto;
-  padding: 0 28px 36px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-}
-.kpi-card {
-  background: var(--card-bg);
-  border: 1px solid var(--card-bdr);
-  border-radius: 6px;
-  padding: 22px 20px 18px;
-  position: relative; overflow: hidden;
-  transition: border-color 0.25s, background 0.25s;
-  cursor: default;
-}
-.kpi-card::after {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, transparent, var(--accent-color, var(--accent)), transparent);
-  transform: scaleX(0); transform-origin: left;
-  transition: transform 0.4s ease;
-}
-.kpi-card:hover { border-color: rgba(220,20,60,0.2); background: rgba(255,255,255,0.035); }
-.kpi-card:hover::after { transform: scaleX(1); }
-
-.kpi-label {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.6rem; letter-spacing: 0.2em;
-  text-transform: uppercase; color: var(--text-dim); margin-bottom: 10px;
-}
-.kpi-val {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(1.9rem, 3.2vw, 2.8rem);
-  letter-spacing: 0.04em; line-height: 1;
-  margin-bottom: 6px;
-}
-.kpi-val.green { color: var(--win-bright); }
-.kpi-val.red   { color: var(--loss); }
-.kpi-val.white { color: var(--text); }
-.kpi-val.gold  { color: var(--gold); }
-
-.kpi-sub {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.62rem; color: var(--text-dim);
-}
-
-/* ═══════════════════════════════
-   SECTION HEADER
-═══════════════════════════════ */
-.section { max-width: 1240px; margin: 0 auto; padding: 0 28px 44px; }
-.sec-head {
-  display: flex; align-items: center; gap: 16px; margin-bottom: 18px;
-}
-.sec-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.15rem; letter-spacing: 0.14em;
-  text-transform: uppercase; color: var(--text-mid);
-  white-space: nowrap;
-}
-.sec-line { flex: 1; height: 1px; background: var(--divider); }
-.sec-badge {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase;
-  color: var(--text-dim); white-space: nowrap;
-}
-
-/* ═══════════════════════════════
-   TIER CARDS
-═══════════════════════════════ */
-.tier-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
-}
-.tier-card {
-  border: 1px solid var(--card-bdr);
-  border-radius: 6px; padding: 24px;
-  position: relative; overflow: hidden;
-  background: linear-gradient(145deg, rgba(255,255,255,0.025) 0%, rgba(255,255,255,0.01) 100%);
-  transition: transform 0.2s, border-color 0.25s;
-}
-.tier-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.12); }
-.tier-card .corner-accent {
-  position: absolute; top: 0; right: 0;
-  width: 60px; height: 60px;
-  border-left: 1px solid; border-bottom: 1px solid;
-  border-color: var(--tc); opacity: 0.15;
-  border-radius: 0 0 0 60px;
-}
-.tier-card .bottom-bar {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  height: 3px; background: var(--tc);
-  opacity: 0.7;
-}
-.tier-pill {
-  display: inline-flex; align-items: center; gap: 5px;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.6rem; letter-spacing: 0.18em; font-weight: 500;
-  padding: 3px 10px; border-radius: 2px; margin-bottom: 12px;
-  text-transform: uppercase; color: var(--tc);
-  border: 1px solid var(--tc); background: rgba(0,0,0,0.2);
-}
-.tier-name {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.5rem; letter-spacing: 0.08em;
-  color: var(--tc); margin-bottom: 2px;
-}
-.tier-record {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 2.8rem; letter-spacing: 0.02em;
-  line-height: 1; margin: 8px 0 6px;
-}
-.tier-record .sep { color: var(--divider); margin: 0 3px; }
-
-.win-track {
-  height: 3px; background: rgba(255,255,255,0.06);
-  border-radius: 2px; overflow: hidden; margin-bottom: 18px;
-}
-.win-fill {
-  height: 100%; border-radius: 2px;
-  background: var(--tc); width: 0%;
-  transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.tier-stats {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 14px; padding-top: 16px;
-  border-top: 1px solid rgba(255,255,255,0.06);
-}
-.ts-label {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.57rem; letter-spacing: 0.15em;
-  text-transform: uppercase; color: var(--text-dim); margin-bottom: 3px;
-}
-.ts-val {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.88rem; font-weight: 500; color: var(--text);
-}
-.ts-val.g { color: var(--win-bright); }
-.ts-val.r { color: var(--loss); }
-
-/* ═══════════════════════════════
-   P&L CHART
-═══════════════════════════════ */
-.chart-wrap {
-  background: var(--card-bg); border: 1px solid var(--card-bdr);
-  border-radius: 6px; padding: 22px 22px 16px;
-  position: relative;
-}
-.chart-controls {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
-}
-.chart-title-sm {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.65rem; letter-spacing: 0.14em; color: var(--text-dim); text-transform: uppercase;
-}
-.view-toggle { display: flex; gap: 4px; }
-.vbtn {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase;
-  padding: 5px 12px; background: transparent;
-  border: 1px solid var(--divider); border-radius: 3px;
-  color: var(--text-dim); cursor: pointer; transition: all 0.18s;
-}
-.vbtn:hover { color: var(--text); border-color: var(--card-bdr); }
-.vbtn.on { color: var(--accent); border-color: rgba(220,20,60,0.5); background: rgba(220,20,60,0.08); }
-
-#chart-svg {
-  display: block; width: 100%;
-  overflow: visible;
-}
-
-.tooltip {
-  position: absolute; pointer-events: none; opacity: 0; z-index: 20;
-  background: rgba(10,10,10,0.96); border: 1px solid var(--card-bdr);
-  border-radius: 5px; padding: 10px 14px;
-  font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem;
-  transition: opacity 0.12s; min-width: 140px;
-}
-.tt-date { color: var(--text-mid); margin-bottom: 6px; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; }
-.tt-row { display: flex; justify-content: space-between; gap: 20px; margin-bottom: 2px; }
-.tt-label { color: var(--text-dim); }
-.tt-val { font-weight: 500; }
-
-/* ═══════════════════════════════
-   PICKS TABLE
-═══════════════════════════════ */
-.table-wrap {
-  border: 1px solid var(--card-bdr); border-radius: 6px; overflow: hidden;
-  overflow-x: auto;
-}
-table { width: 100%; border-collapse: collapse; }
-thead th {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.58rem; letter-spacing: 0.18em; text-transform: uppercase;
-  color: var(--text-dim); padding: 12px 14px; text-align: left;
-  background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--divider);
-  white-space: nowrap;
-}
-tbody tr { border-bottom: 1px solid var(--divider); transition: background 0.12s; }
-tbody tr:last-child { border-bottom: none; }
-tbody tr:hover { background: rgba(255,255,255,0.02); }
-tbody tr.tier-header td {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase;
-  padding: 8px 14px;
-  background: rgba(255,255,255,0.012); border-bottom: 1px solid var(--divider);
-}
-td {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.72rem; color: var(--text);
-  padding: 11px 14px; white-space: nowrap;
-}
-
-/* Tier pill mini */
-.tp {
-  display: inline-block; font-size: 0.58rem; font-weight: 500;
-  letter-spacing: 0.12em; padding: 2px 7px; border-radius: 2px;
-}
-.tp-wh { background: rgba(196,160,32,0.14); color: var(--wh); border: 1px solid rgba(196,160,32,0.25); }
-.tp-fi { background: rgba(220,20,60,0.10); color: var(--fi); border: 1px solid rgba(220,20,60,0.25); }
-.tp-ou { background: rgba(74,144,217,0.10); color: var(--ou); border: 1px solid rgba(74,144,217,0.25); }
-
-.r-win  { color: var(--win-bright); font-weight: 600; }
-.r-loss { color: var(--loss); }
-.r-push { color: var(--push); }
-.p-pos  { color: var(--win-bright); }
-.p-neg  { color: var(--loss); }
-
-/* ═══════════════════════════════
-   CALIBRATION
-═══════════════════════════════ */
-.cal-wrap {
-  background: var(--card-bg); border: 1px solid var(--card-bdr);
-  border-radius: 6px; padding: 24px;
-}
-.cal-note {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.62rem; letter-spacing: 0.1em; color: var(--text-dim);
-  margin-bottom: 22px; display: flex; gap: 20px; flex-wrap: wrap;
-}
-.cal-legend { display: flex; align-items: center; gap: 6px; }
-.cal-swatch { width: 12px; height: 8px; border-radius: 1px; }
-.cal-rows { display: flex; flex-direction: column; gap: 11px; }
-.cal-row {
-  display: grid; grid-template-columns: 76px 1fr 54px 46px;
-  align-items: center; gap: 12px;
-}
-.cal-lbl {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.65rem; color: var(--text-dim); text-align: right;
-}
-.cal-track {
-  height: 18px; background: rgba(255,255,255,0.03);
-  border-radius: 2px; overflow: hidden; position: relative;
-}
-.cal-exp {
-  position: absolute; top: 0; left: 0; height: 100%;
-  background: rgba(255,255,255,0.09); border-radius: 2px;
-}
-.cal-act {
-  position: absolute; top: 0; left: 0; height: 100%;
-  border-radius: 2px; width: 0%;
-  transition: width 1.1s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.cal-val {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.68rem; font-weight: 500; text-align: right;
-}
-.cal-n {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.6rem; color: var(--text-dim); text-align: right;
-}
-
-/* ═══════════════════════════════
-   FOOTER
-═══════════════════════════════ */
-footer {
-  border-top: 1px solid var(--divider);
-  margin-top: 60px; padding: 30px 28px;
-}
-.foot-inner {
-  max-width: 1240px; margin: 0 auto;
-  display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: 12px;
-}
-.foot-logo {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.1rem; letter-spacing: 0.1em; color: var(--text-dim);
-}
-.foot-logo span { color: var(--accent); }
-.foot-meta {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.62rem; color: var(--text-dim); letter-spacing: 0.08em;
-  text-align: right;
-}
-
-/* ═══════════════════════════════
-   ANIMATIONS
-═══════════════════════════════ */
-.fade-up { animation: fuAnim 0.55s ease both; }
-.d1 { animation-delay: 0.05s; }
-.d2 { animation-delay: 0.12s; }
-.d3 { animation-delay: 0.19s; }
-.d4 { animation-delay: 0.26s; }
-@keyframes fuAnim {
-  from { opacity: 0; transform: translateY(18px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ═══════════════════════════════
-   RESPONSIVE
-═══════════════════════════════ */
-@media (max-width: 900px) {
-  .tier-grid { grid-template-columns: 1fr; }
-}
-@media (max-width: 720px) {
-  .kpi-strip { grid-template-columns: repeat(2, 1fr); }
-  .hero { padding-top: 36px; }
-  .hero-title { font-size: 3rem; }
-  .hero-right { display: none; }
-  .hide-m { display: none !important; }
-  .cal-row { grid-template-columns: 65px 1fr 48px; }
-  .cal-n { display: none; }
-}
-@media (max-width: 480px) {
-  .kpi-strip { gap: 8px; }
-  .wrap, .section, .hero { padding-left: 16px; padding-right: 16px; }
-  .kpi-strip { padding-left: 16px; padding-right: 16px; }
-  header .header-inner { padding: 0 16px; }
-  footer { padding: 24px 16px; }
-}
+  :root {
+    --bg:    #0D0D0D;
+    --text:  #F0EDE8;
+    --accent:#DC143C;
+    --data:  #4A90D9;
+    --gold:  #B8960C;
+    --card:  #1a1a1a;
+    --border:#2a2a2a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  header {
+    background: #0a0a0a;
+    border-bottom: 2px solid var(--accent);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  header h1 { font-size: 1.4rem; letter-spacing: .05em; color: var(--text); }
+  header .tagline { font-size: .8rem; color: #888; }
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: #111;
+    padding: 0 1rem;
+  }
+  .tab-btn {
+    padding: .7rem 1.2rem;
+    border: none;
+    background: transparent;
+    color: #888;
+    font-size: .9rem;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: .2s;
+  }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-panel { display: none; padding: 1.5rem; max-width: 960px; margin: 0 auto; }
+  .tab-panel.active { display: block; }
+  .pick-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.2rem;
+    margin-bottom: .8rem;
+  }
+  .pick-card.wheelhouse { border-left: 4px solid var(--accent); }
+  .pick-card.filthy     { border-left: 4px solid var(--data); }
+  .pick-card.ou         { border-left: 4px solid var(--gold); }
+  .pick-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: .4rem;
+  }
+  .tier-badge {
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    padding: .2rem .6rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+  .badge-wheelhouse { background: var(--accent); color: #fff; }
+  .badge-filthy     { background: var(--data);   color: #fff; }
+  .badge-ou         { background: var(--gold);   color: #000; }
+  .pick-bet  { font-size: 1.05rem; font-weight: 600; }
+  .pick-meta { font-size: .82rem; color: #aaa; margin-top: .3rem; }
+  .pick-meta span { margin-right: 1rem; }
+  .ev-pos { color: #4caf50; }
+  .ev-neg { color: var(--accent); }
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: .8rem;
+    margin-bottom: 1.5rem;
+  }
+  .kpi-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: .8rem 1rem;
+    text-align: center;
+  }
+  .kpi-val { font-size: 1.5rem; font-weight: 700; color: var(--accent); }
+  .kpi-lbl { font-size: .78rem; color: #888; margin-top: .2rem; }
+  .no-picks {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+    font-size: 1rem;
+  }
+  .section-hdr {
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #666;
+    margin: 1rem 0 .6rem;
+  }
+  footer {
+    text-align: center;
+    padding: 1.5rem;
+    font-size: .75rem;
+    color: #444;
+    border-top: 1px solid var(--border);
+  }
+  a { color: var(--data); text-decoration: none; }
+  a:hover { text-decoration: underline; }
 </style>
+
 </head>
 <body>
-
-<div class="scan-line"></div>
-
-<!-- ═══ HEADER ═══ -->
-<header>
-  <div class="header-inner">
-    <a href="index.html" class="logo">EYEBLACK<span class="logo-iq">IQ</span><div class="logo-dot"></div></a>
-    <nav class="nav">
-      <a href="index.html" class="nav-link">Today's Picks</a>
-      <a href="performance.html" class="nav-link active">Performance</a>
-    </nav>
-  </div>
-</header>
-
-<!-- ═══ HERO ═══ -->
-<div class="hero fade-up d1">
-  <div class="hero-left">
-    <div class="hero-eyebrow">2026 NCAA Baseball · Season Performance</div>
-    <h1 class="hero-title">THE<br><span>RECORD</span></h1>
-    <div class="hero-meta">
-      <div class="hero-meta-item"><div class="dot"></div><span id="hero-tracking">Tracking publicly since Mar 7</span></div>
-      <div class="hero-meta-item"><div class="dot red"></div><span id="hero-updated">—</span></div>
+  <header>
+    <div>
+      <h1>EyeBlackIQ  ·  Performance</h1>
+      <div class="tagline">Season record through 2026-03-09</div>
     </div>
-  </div>
-  <div class="hero-right">
-    <div class="live-badge"><div class="live-dot"></div>Model Active · Receipts Posted</div>
-  </div>
-</div>
-
-<!-- ═══ KPI STRIP ═══ -->
-<div class="kpi-strip">
-  <div class="kpi-card fade-up d1">
-    <div class="kpi-label">Season Record</div>
-    <div class="kpi-val white" id="k-record">—</div>
-    <div class="kpi-sub" id="k-graded">— graded picks</div>
-  </div>
-  <div class="kpi-card fade-up d2">
-    <div class="kpi-label">Win Rate</div>
-    <div class="kpi-val green" id="k-wr">—</div>
-    <div class="kpi-sub">vs. closing line implied</div>
-  </div>
-  <div class="kpi-card fade-up d3">
-    <div class="kpi-label">Units P&amp;L</div>
-    <div class="kpi-val green" id="k-pnl">—</div>
-    <div class="kpi-sub">WH 2u · FI 1.5u · OU 1u</div>
-  </div>
-  <div class="kpi-card fade-up d4">
-    <div class="kpi-label">Season ROI</div>
-    <div class="kpi-val green" id="k-roi">—</div>
-    <div class="kpi-sub">return on investment</div>
-  </div>
-</div>
-
-<!-- ═══ TIER BREAKDOWN ═══ -->
-<div class="section fade-up d2">
-  <div class="sec-head">
-    <span class="sec-title">Tier Breakdown</span>
-    <div class="sec-line"></div>
-    <span class="sec-badge">WH · FI · OU</span>
-  </div>
-  <div class="tier-grid" id="tier-grid">
-    <!-- rendered by JS -->
-  </div>
-</div>
-
-<!-- ═══ CUMULATIVE P&L CHART ═══ -->
-<div class="section fade-up d3">
-  <div class="sec-head">
-    <span class="sec-title">Cumulative P&amp;L</span>
-    <div class="sec-line"></div>
-  </div>
-  <div class="chart-wrap">
-    <div class="chart-controls">
-      <div class="chart-title-sm" id="chart-subtitle">All graded picks</div>
-      <div class="view-toggle">
-        <button class="vbtn on" onclick="setView('season',this)">Season</button>
-        <button class="vbtn" onclick="setView('last10',this)">Last 10</button>
-        <button class="vbtn" onclick="setView('weekly',this)">This Week</button>
+    <div><a href="index.html" style="font-size:.82rem">← Today's Picks</a></div>
+  </header>
+  <div style="padding:1.5rem;max-width:860px;margin:0 auto">
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-val">16</div>
+        <div class="kpi-lbl">Graded Picks</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-val">68.8%</div>
+        <div class="kpi-lbl">Win Rate</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-val" style="color:#4caf50">+1.5u</div>
+        <div class="kpi-lbl">Season P&amp;L</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-val">11-5</div>
+        <div class="kpi-lbl">Record</div>
       </div>
     </div>
-    <div style="position:relative;">
-      <svg id="chart-svg" viewBox="0 0 900 230" preserveAspectRatio="none" style="height:250px;"></svg>
-      <div class="tooltip" id="tooltip"></div>
-    </div>
+    <p style="color:#555;font-size:.82rem;margin-top:.5rem">
+      All picks graded at closing line. Units: Wheelhouse=2.0u · Filthy=1.5u · O/U=1.0u
+      &nbsp;·&nbsp; <a href="methodology.html">Full Methodology</a>
+    </p>
   </div>
-</div>
-
-<!-- ═══ GRADED PICKS TABLE ═══ -->
-<div class="section fade-up d3">
-  <div class="sec-head">
-    <span class="sec-title">Graded Picks</span>
-    <div class="sec-line"></div>
-    <span class="sec-badge" id="table-count">—</span>
-  </div>
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Matchup</th>
-          <th>Tier</th>
-          <th>Pick</th>
-          <th class="hide-m">Line</th>
-          <th class="hide-m">WP%</th>
-          <th class="hide-m">EV%</th>
-          <th>Result</th>
-          <th>P&amp;L</th>
-        </tr>
-      </thead>
-      <tbody id="picks-body"></tbody>
-    </table>
-  </div>
-</div>
-
-<!-- ═══ MODEL CALIBRATION ═══ -->
-<div class="section fade-up d4">
-  <div class="sec-head">
-    <span class="sec-title">Model Calibration</span>
-    <div class="sec-line"></div>
-    <span class="sec-badge">Expected WP% vs Actual Win Rate</span>
-  </div>
-  <div class="cal-wrap">
-    <div class="cal-note">
-      <div class="cal-legend"><div class="cal-swatch" style="background:rgba(255,255,255,0.12)"></div><span>Expected Win%</span></div>
-      <div class="cal-legend"><div class="cal-swatch" style="background:var(--accent)"></div><span>Actual Win%</span></div>
-      <span style="margin-left:auto;">How well does the model know what it knows?</span>
-    </div>
-    <div class="cal-rows" id="cal-rows"></div>
-  </div>
-</div>
-
-<!-- ═══ FOOTER ═══ -->
-<footer>
-  <div class="foot-inner">
-    <div class="foot-logo">EYEBLACK<span>IQ</span></div>
-    <div class="foot-meta">
-      <div id="foot-updated">—</div>
-      <div>2026 NCAA Baseball Season</div>
-    </div>
-  </div>
-</footer>
-
-<script>
-/* ═══════════════════════════════════════════════════════════════
-   DATA INJECTION POINT
-   performance_generator.py replaces {{PERFORMANCE_DATA}} with:
-     json.dumps(build_stats(results_store), ensure_ascii=False)
-   ═══════════════════════════════════════════════════════════════ */
-const DATA = {"meta":{"tracking_since":"Mar 7","last_updated":"March 08, 2026","season":"2026"},"season":{"record":{"w":7,"l":3,"push":0},"win_rate":70.0,"units_pnl":2.38,"roi_pct":15.4,"graded_picks":10},"tiers":{"WH":{"name":"Wheelhouse","record":{"w":2,"l":1},"units_pnl":-0.32,"avg_ev":30.3,"avg_wp":89.0,"stake":2.0,"graded":3},"FI":{"name":"Filthy","record":{"w":4,"l":1},"units_pnl":2.79,"avg_ev":40.8,"avg_wp":73.4,"stake":1.5,"graded":5},"OU":{"name":"Over/Under","record":{"w":1,"l":1},"units_pnl":-0.09,"avg_ev":0.0,"avg_wp":50.0,"stake":1.0,"graded":2}},"picks":[{"date":"Mar 7","matchup":"UCLA Bruins @ Ohio State","tier":"OU","pick":"UNDER 14.0","line":"-110","model_wp":50.0,"ev":0.0,"result":"LOSS","pnl":-1.0,"tbd_count":0,"gate":"CLEAN"},{"date":"Mar 7","matchup":"Virginia Tech @ Georgia Tech","tier":"OU","pick":"OVER 14.0","line":"-110","model_wp":50.0,"ev":0.0,"result":"WIN","pnl":0.91,"tbd_count":0,"gate":"CLEAN"},{"date":"Mar 7","matchup":"UNC Wilmington Seahawks @ Jacksonville Dolphins","tier":"FI","pick":"Jacksonville Dolphins ML","line":"+114","model_wp":67.2,"ev":43.8,"result":"LOSS","pnl":-1.5,"tbd_count":0,"gate":"CLEAN"},{"date":"Mar 7","matchup":"Florida Atlantic Owls @ Florida Int'l Golden Panthers","tier":"FI","pick":"Florida Int'l Golden Panthers ML","line":"+140","model_wp":67.2,"ev":61.2,"result":"WIN","pnl":0.83,"tbd_count":0,"gate":"CLEAN"},{"date":"Mar 7","matchup":"Louisiana-Lafayette @ Dallas Baptist","tier":"FI","pick":"Louisiana-Lafayette ML","line":"+130","model_wp":69.2,"ev":59.2,"result":"WIN","pnl":1.95,"tbd_count":0,"gate":"CLEAN"},{"date":"Mar 7","matchup":"Wright St Raiders @ Tennessee","tier":"FI","pick":"Tennessee ML","line":"-580","model_wp":90.7,"ev":6.3,"result":"WIN","pnl":0.26,"tbd_count":0,"gate":"CLEAN"},{"date":"Mar 7","matchup":"Notre Dame Fighting Irish @ Duke","tier":"FI","pick":"Duke ML","line":"-120","model_wp":73.0,"ev":33.7,"result":"WIN","pnl":1.25,"tbd_count":0,"gate":"CLEAN"},{"date":"Mar 7","matchup":"Maryland @ Troy Trojans","tier":"WH","pick":"Troy Trojans ML","line":"-175","model_wp":80.6,"ev":26.6,"result":"LOSS","pnl":-2.0,"tbd_count":0,"gate":"CLEAN"},{"date":"Mar 7","matchup":"Grand Canyon @ Utah Utes","tier":"WH","pick":"Utah Utes ML","line":"-154","model_wp":91.9,"ev":51.6,"result":"WIN","pnl":1.3,"tbd_count":0,"gate":"CLEAN"},{"date":"Mar 7","matchup":"Xavier @ Oregon St Beavers","tier":"WH","pick":"Oregon St Beavers ML","line":"-520","model_wp":94.5,"ev":12.7,"result":"WIN","pnl":0.38,"tbd_count":0,"gate":"CLEAN"}],"calibration":[{"bucket":"60-65%","picks":2,"expected":62.5,"actual":50.0},{"bucket":"65-70%","picks":3,"expected":67.5,"actual":66.7},{"bucket":"70-75%","picks":1,"expected":72.5,"actual":100.0},{"bucket":"80-85%","picks":1,"expected":82.5,"actual":0.0},{"bucket":"90-95%","picks":3,"expected":92.5,"actual":100.0}],"thresholds":{"pod_min_ev_pct":7.0,"pod_max_ml":-450,"pod_min_wp":0.72}};
-
-/* ── UTILS ── */
-const $ = id => document.getElementById(id);
-const pu = v => (v >= 0 ? '+' : '') + v.toFixed(1) + 'u';
-const pc = v => v.toFixed(1) + '%';
-
-/* ── INIT ── */
-function init() {
-  const D = DATA;
-  const m = D.season;
-
-  // Hero / Footer
-  $('hero-updated').textContent = 'Last updated: ' + D.meta.last_updated;
-  $('foot-updated').textContent = 'Updated ' + D.meta.last_updated;
-
-  // KPIs
-  $('k-record').textContent = m.record.w + '-' + m.record.l;
-  $('k-graded').textContent = m.graded_picks + ' graded picks';
-  $('k-wr').textContent = pc(m.win_rate);
-  const pnlEl = $('k-pnl'); pnlEl.textContent = pu(m.units_pnl);
-  pnlEl.className = 'kpi-val ' + (m.units_pnl >= 0 ? 'green' : 'red');
-  const roiEl = $('k-roi'); roiEl.textContent = (m.roi_pct >= 0 ? '+' : '') + pc(m.roi_pct);
-  roiEl.className = 'kpi-val ' + (m.roi_pct >= 0 ? 'green' : 'red');
-
-  // Tiers
-  renderTiers(D.tiers);
-
-  // Chart
-  renderChart(D.picks);
-
-  // Table
-  renderTable(D.picks);
-
-  // Calibration
-  renderCal(D.calibration);
-}
-
-/* ── TIER CARDS ── */
-function renderTiers(tiers) {
-  const cfg = {
-    WH: { color: '#C4A020', label: 'WH · 2 Units', shortName: 'WHEELHOUSE' },
-    FI: { color: '#DC143C', label: 'FI · 1.5 Units', shortName: 'FILTHY' },
-    OU: { color: '#4A90D9', label: 'OU · 1 Unit', shortName: 'OVER/UNDER' }
-  };
-
-  const grid = $('tier-grid');
-  grid.innerHTML = '';
-
-  ['WH','FI','OU'].forEach(key => {
-    const t = tiers[key];
-    const c = cfg[key];
-    const total = t.record.w + t.record.l;
-    const wr = total > 0 ? (t.record.w / total * 100) : 0;
-    const pnlColor = t.units_pnl >= 0 ? '#27AE60' : '#DC143C';
-    const pnlClass2 = t.units_pnl >= 0 ? 'g' : 'r';
-
-    const div = document.createElement('div');
-    div.className = 'tier-card';
-    div.style.setProperty('--tc', c.color);
-    div.innerHTML = `
-      <div class="corner-accent"></div>
-      <span class="tier-pill">${c.label}</span>
-      <div class="tier-name">${c.shortName}</div>
-      <div class="tier-record">${t.record.w}<span class="sep">–</span>${t.record.l}</div>
-      <div class="win-track"><div class="win-fill" id="wf-${key}" style="background:${c.color}"></div></div>
-      <div class="tier-stats">
-        <div>
-          <div class="ts-label">Win Rate</div>
-          <div class="ts-val">${pc(wr)}</div>
-        </div>
-        <div>
-          <div class="ts-label">P&L Units</div>
-          <div class="ts-val ${pnlClass2}">${pu(t.units_pnl)}</div>
-        </div>
-        <div>
-          <div class="ts-label">Avg EV</div>
-          <div class="ts-val">+${t.avg_ev.toFixed(1)}%</div>
-        </div>
-        <div>
-          <div class="ts-label">Graded</div>
-          <div class="ts-val">${total}</div>
-        </div>
-      </div>
-      <div class="bottom-bar"></div>`;
-    grid.appendChild(div);
-
-    setTimeout(() => {
-      const bar = $('wf-' + key);
-      if (bar) bar.style.width = Math.min(wr, 100) + '%';
-    }, 350);
-  });
-}
-
-/* ── CHART ── */
-let allPicks = [];
-function renderChart(picks) {
-  allPicks = picks;
-
-  // Group by date → cumulative pnl
-  const byDate = {};
-  picks.forEach(p => {
-    if (!byDate[p.date]) byDate[p.date] = { pnl: 0, w: 0, l: 0 };
-    byDate[p.date].pnl += p.pnl;
-    if (p.result === 'WIN') byDate[p.date].w++;
-    else if (p.result === 'LOSS') byDate[p.date].l++;
-  });
-
-  const dates = Object.keys(byDate).sort((a,b) => a.localeCompare(b));
-  let cum = 0;
-  const pts = dates.map(d => {
-    cum += byDate[d].pnl;
-    return { date: d, dayPnl: byDate[d].pnl, cum, w: byDate[d].w, l: byDate[d].l };
-  });
-
-  drawChart(pts);
-}
-
-function drawChart(pts) {
-  const svg = $('chart-svg');
-  svg.innerHTML = '';
-
-  const W = 900, H = 210;
-  const PAD = { t: 24, r: 20, b: 36, l: 46 };
-  const cW = W - PAD.l - PAD.r;
-  const cH = H - PAD.t - PAD.b;
-
-  if (!pts.length) return;
-
-  const allCum = pts.map(p => p.cum);
-  const maxV = Math.max(...allCum, 1);
-  const minV = Math.min(...allCum, 0);
-  const range = maxV - minV || 1;
-
-  const xS = i => PAD.l + (pts.length > 1 ? (i / (pts.length - 1)) * cW : cW / 2);
-  const yS = v => PAD.t + cH - ((v - minV) / range) * cH;
-  const zeroY = yS(0);
-
-  // Build SVG using innerHTML for clarity
-  const NS = 'http://www.w3.org/2000/svg';
-  const mk = tag => document.createElementNS(NS, tag);
-  const set = (el, attrs) => { Object.entries(attrs).forEach(([k,v]) => el.setAttribute(k,v)); return el; };
-
-  // Defs
-  const defs = mk('defs');
-  defs.innerHTML = `
-    <linearGradient id="aG" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#DC143C" stop-opacity="0.22"/>
-      <stop offset="100%" stop-color="#DC143C" stop-opacity="0.0"/>
-    </linearGradient>
-    <linearGradient id="lG" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#C4A020"/>
-      <stop offset="50%" stop-color="#DC143C"/>
-      <stop offset="100%" stop-color="#4A90D9"/>
-    </linearGradient>
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="3" result="b"/>
-      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>`;
-  svg.appendChild(defs);
-
-  // Grid lines (horizontal)
-  const steps = 4;
-  for (let i = 0; i <= steps; i++) {
-    const v = minV + (range / steps) * i;
-    const y = yS(v);
-    const line = set(mk('line'), { x1: PAD.l, y1: y, x2: W - PAD.r, y2: y,
-      stroke: '#1C1C1C', 'stroke-width': 1, 'stroke-dasharray': i === 0 ? 'none' : '3,5' });
-    svg.appendChild(line);
-    const txt = set(mk('text'), { x: PAD.l - 6, y: y + 4, 'text-anchor': 'end',
-      fill: '#555', 'font-size': 9, 'font-family': 'IBM Plex Mono, monospace' });
-    txt.textContent = pu(v);
-    svg.appendChild(txt);
-  }
-
-  // Zero line
-  const zLine = set(mk('line'), { x1: PAD.l, y1: zeroY, x2: W - PAD.r, y2: zeroY,
-    stroke: '#333', 'stroke-width': 1 });
-  svg.appendChild(zLine);
-
-  // Day bars
-  const barW = Math.max(6, (cW / pts.length) * 0.35);
-  pts.forEach((p, i) => {
-    const x = xS(i);
-    const bH = Math.abs((p.dayPnl / range) * cH) * 0.4;
-    const bY = p.dayPnl >= 0 ? zeroY - bH : zeroY;
-    const rect = set(mk('rect'), {
-      x: x - barW/2, y: bY, width: barW, height: bH, rx: 1,
-      fill: p.dayPnl >= 0 ? 'rgba(27,107,60,0.45)' : 'rgba(220,20,60,0.35)'
-    });
-    svg.appendChild(rect);
-  });
-
-  // Area + Line paths
-  let linePts = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${xS(i)} ${yS(p.cum)}`).join(' ');
-  const areaD = linePts + ` L ${xS(pts.length-1)} ${zeroY} L ${xS(0)} ${zeroY} Z`;
-  svg.appendChild(set(mk('path'), { d: areaD, fill: 'url(#aG)' }));
-  svg.appendChild(set(mk('path'), { d: linePts, fill: 'none', stroke: 'url(#lG)',
-    'stroke-width': '2.5', 'stroke-linecap': 'round', filter: 'url(#glow)' }));
-
-  // Tooltip ref
-  const tt = $('tooltip');
-  const chartBox = svg.parentElement;
-
-  // Dots + labels
-  pts.forEach((p, i) => {
-    const x = xS(i), y = yS(p.cum);
-    const dot = set(mk('circle'), { cx: x, cy: y, r: 5, fill: '#DC143C',
-      stroke: '#0D0D0D', 'stroke-width': 2, style: 'cursor:pointer' });
-
-    dot.addEventListener('mouseenter', (e) => {
-      const br = chartBox.getBoundingClientRect();
-      const ex = e.clientX - br.left, ey = e.clientY - br.top;
-      const ttX = ex > br.width * 0.7 ? ex - 160 : ex + 14;
-      tt.style.left = ttX + 'px'; tt.style.top = (ey - 50) + 'px'; tt.style.opacity = '1';
-      tt.innerHTML = `<div class="tt-date">${p.date}</div>
-        <div class="tt-row"><span class="tt-label">Day P&L</span><span class="tt-val" style="color:${p.dayPnl>=0?'#27AE60':'#DC143C'}">${pu(p.dayPnl)}</span></div>
-        <div class="tt-row"><span class="tt-label">Season Total</span><span class="tt-val" style="color:#4A90D9">${pu(p.cum)}</span></div>
-        <div class="tt-row"><span class="tt-label">Record</span><span class="tt-val" style="color:#B0ADA8">${p.w}W–${p.l}L</span></div>`;
-    });
-    dot.addEventListener('mouseleave', () => { tt.style.opacity = '0'; });
-    svg.appendChild(dot);
-
-    // Cumulative label above dot
-    const lbl = set(mk('text'), { x, y: y - 11, 'text-anchor': 'middle',
-      fill: p.cum >= 0 ? '#27AE60' : '#DC143C',
-      'font-size': 8.5, 'font-family': 'IBM Plex Mono, monospace', 'font-weight': 500 });
-    lbl.textContent = pu(p.cum);
-    svg.appendChild(lbl);
-
-    // X axis label
-    const xl = set(mk('text'), { x, y: H - 4, 'text-anchor': 'middle',
-      fill: '#555', 'font-size': 9, 'font-family': 'IBM Plex Mono, monospace' });
-    xl.textContent = p.date;
-    svg.appendChild(xl);
-  });
-}
-
-function setView(view, btn) {
-  document.querySelectorAll('.vbtn').forEach(b => b.classList.remove('on'));
-  btn.classList.add('on');
-  let picks = allPicks;
-  let subtitle = 'All graded picks';
-  if (view === 'last10') {
-    picks = [...allPicks].sort((a,b) => b.date.localeCompare(a.date)).slice(0, 10);
-    subtitle = 'Last 10 graded picks';
-  } else if (view === 'weekly') {
-    const dates = [...new Set(allPicks.map(p => p.date))].sort().reverse().slice(0, 5);
-    picks = allPicks.filter(p => dates.includes(p.date));
-    subtitle = 'This week';
-  }
-  $('chart-subtitle').textContent = subtitle;
-  renderChart(picks);
-}
-
-/* ── PICKS TABLE ── */
-function renderTable(picks) {
-  const order = { WH: 0, FI: 1, OU: 2 };
-  const sorted = [...picks].sort((a, b) => {
-    const td = order[a.tier] - order[b.tier];
-    return td !== 0 ? td : b.date.localeCompare(a.date);
-  });
-
-  $('table-count').textContent = sorted.length + ' picks total';
-  const tbody = $('picks-body');
-  tbody.innerHTML = '';
-
-  const tierMeta = {
-    WH: { label: '⬡ Wheelhouse · 2 Units', color: '#C4A020' },
-    FI: { label: '◆ Filthy · 1.5 Units', color: '#DC143C' },
-    OU: { label: '◈ Over / Under · 1 Unit', color: '#4A90D9' }
-  };
-
-  let lastTier = null;
-  sorted.forEach(p => {
-    if (p.tier !== lastTier) {
-      lastTier = p.tier;
-      const sep = document.createElement('tr');
-      sep.className = 'tier-header';
-      sep.innerHTML = `<td colspan="9" style="color:${tierMeta[p.tier].color}">${tierMeta[p.tier].label}</td>`;
-      tbody.appendChild(sep);
-    }
-
-    const tr = document.createElement('tr');
-    const rCls = p.result === 'WIN' ? 'r-win' : p.result === 'LOSS' ? 'r-loss' : 'r-push';
-    const pCls = p.pnl > 0 ? 'p-pos' : p.pnl < 0 ? 'p-neg' : '';
-    const tpCls = 'tp-' + p.tier.toLowerCase();
-    tr.innerHTML = `
-      <td>${p.date}</td>
-      <td>${p.matchup}</td>
-      <td><span class="tp ${tpCls}">${p.tier}</span></td>
-      <td>${p.pick}</td>
-      <td class="hide-m">${p.line || '—'}</td>
-      <td class="hide-m">${p.model_wp ? p.model_wp.toFixed(1) + '%' : '—'}</td>
-      <td class="hide-m">${p.ev ? '+' + p.ev.toFixed(1) + '%' : '—'}</td>
-      <td class="${rCls}">${p.result}</td>
-      <td class="${pCls}">${pu(p.pnl)}</td>`;
-    tbody.appendChild(tr);
-  });
-}
-
-/* ── CALIBRATION ── */
-function renderCal(cal) {
-  const rows = $('cal-rows');
-  rows.innerHTML = '';
-  cal.forEach(r => {
-    const beat = r.actual >= r.expected;
-    const near = r.actual >= r.expected * 0.85;
-    const color = beat ? '#27AE60' : near ? '#C4A020' : '#DC143C';
-    const div = document.createElement('div');
-    div.className = 'cal-row';
-    div.innerHTML = `
-      <div class="cal-lbl">${r.bucket}</div>
-      <div class="cal-track">
-        <div class="cal-exp" style="width:${r.expected}%"></div>
-        <div class="cal-act" data-w="${r.actual}%" style="background:${color}"></div>
-      </div>
-      <div class="cal-val" style="color:${color}">${r.actual.toFixed(0)}%</div>
-      <div class="cal-n">n=${r.picks}</div>`;
-    rows.appendChild(div);
-  });
-
-  // Animate bars
-  setTimeout(() => {
-    document.querySelectorAll('.cal-act').forEach(el => {
-      el.style.width = el.dataset.w;
-    });
-  }, 400);
-}
-
-/* ── GO ── */
-init();
-</script>
+  <footer>EyeBlackIQ &nbsp;·&nbsp; <a href="index.html">Today's Picks</a></footer>
 </body>
 </html>
