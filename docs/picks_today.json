@@ -1,35 +1,129 @@
 {
-  "date": "2026-03-09",
-  "generated_at": "2026-03-09T12:37:04",
+  "date": "2026-03-10",
+  "generated_at": "2026-03-10T13:57:42",
   "model_version": "v3",
   "wheelhouse": [
     {
-      "away": "Xavier",
-      "home": "Oregon St Beavers",
-      "bet": "Oregon St Beavers ML",
-      "wp": 0.8487,
-      "ev": 0.106,
+      "away": "Saint Mary's Gaels",
+      "home": "UC Santa Barbara",
+      "bet": "UC Santa Barbara ML",
+      "wp": 0.8878,
+      "ev": 0.157,
       "units": 2.0,
       "away_ml": 240,
       "home_ml": -330,
-      "pred_total": 11.61,
-      "ou_line": null
+      "pred_total": 10.85,
+      "ou_line": 11.0
+    },
+    {
+      "away": "Maryland",
+      "home": "West Virginia",
+      "bet": "West Virginia ML",
+      "wp": 0.8612,
+      "ev": 0.122,
+      "units": 2.0,
+      "away_ml": 240,
+      "home_ml": -330,
+      "pred_total": 12.16,
+      "ou_line": 13.5
     }
   ],
-  "filthy": [],
-  "ou": [],
+  "filthy": [
+    {
+      "away": "Mississippi",
+      "home": "Southern Mississippi",
+      "bet": "Southern Mississippi ML",
+      "wp": 0.7698,
+      "ev": 0.32,
+      "units": 1.5,
+      "away_ml": 110,
+      "home_ml": -140,
+      "pred_total": 11.34,
+      "ou_line": 10.5
+    },
+    {
+      "away": "Wofford",
+      "home": "South Carolina Upstate Spartans",
+      "bet": "South Carolina Upstate Spartans ML",
+      "wp": 0.7552,
+      "ev": 0.246,
+      "units": 1.5,
+      "away_ml": 120,
+      "home_ml": -154,
+      "pred_total": 12.0,
+      "ou_line": 14.5
+    },
+    {
+      "away": "Wright St Raiders",
+      "home": "Indiana",
+      "bet": "Indiana ML",
+      "wp": 0.75,
+      "ev": 0.179,
+      "units": 1.5,
+      "away_ml": 135,
+      "home_ml": -175,
+      "pred_total": 10.95,
+      "ou_line": 16.0
+    },
+    {
+      "away": "Dallas Baptist",
+      "home": "Oklahoma St Cowboys",
+      "bet": "Oklahoma St Cowboys ML",
+      "wp": 0.7262,
+      "ev": 0.141,
+      "units": 1.5,
+      "away_ml": 135,
+      "home_ml": -175,
+      "pred_total": 11.34,
+      "ou_line": 16.0
+    },
+    {
+      "away": "Boston College",
+      "home": "UConn Huskies",
+      "bet": "UConn Huskies ML",
+      "wp": 0.7137,
+      "ev": 0.144,
+      "units": 1.5,
+      "away_ml": 130,
+      "home_ml": -166,
+      "pred_total": 9.92,
+      "ou_line": 12.5
+    }
+  ],
+  "ou": [
+    {
+      "away": "Wright St Raiders",
+      "home": "Indiana",
+      "bet": "UNDER 16.0",
+      "gap": -5.05,
+      "sp_status": "confirmed",
+      "pred_total": 10.95,
+      "ou_line": 16.0,
+      "units": 1.0
+    },
+    {
+      "away": "Boston College",
+      "home": "UConn Huskies",
+      "bet": "UNDER 12.5",
+      "gap": -2.58,
+      "sp_status": "confirmed",
+      "pred_total": 9.92,
+      "ou_line": 12.5,
+      "units": 1.0
+    }
+  ],
   "pod": {
-    "away": "Xavier",
-    "home": "Oregon St Beavers",
-    "bet": "Oregon St Beavers ML",
-    "wp": 0.8487,
-    "ev": 0.106,
-    "units": 2.0,
-    "away_ml": 240,
-    "home_ml": -330,
-    "pred_total": 11.61,
-    "ou_line": null
+    "away": "Mississippi",
+    "home": "Southern Mississippi",
+    "bet": "Southern Mississippi ML",
+    "wp": 0.7698,
+    "ev": 0.32,
+    "units": 1.5,
+    "away_ml": 110,
+    "home_ml": -140,
+    "pred_total": 11.34,
+    "ou_line": 10.5
   },
-  "pass_count": 5,
-  "total_games": 6
+  "pass_count": 15,
+  "total_games": 22
 }
