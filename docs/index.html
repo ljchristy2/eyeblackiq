@@ -351,9 +351,15 @@ function renderPicks() {
 
   const recEl = document.getElementById('picks-grid');
   if (recEl) {
-    recEl.innerHTML = mainPicks.length
-      ? mainPicks.map(pickCard).join('')
-      : '<p class="empty-state">No plays meeting threshold for current filters.</p>';
+    if (mainPicks.length) {
+      recEl.innerHTML = mainPicks.map(pickCard).join('');
+    } else if (filters.type === 'PROPS') {
+      recEl.innerHTML = '<p class="empty-state">No player props today — props appear on MLB, NHL, and Soccer game days.</p>';
+    } else if (filters.type === 'PICKEM') {
+      recEl.innerHTML = '<p class="empty-state">No pick\'em plays today — pick\'ems are odds within ±120. Check back on days with more near-even-money lines.</p>';
+    } else {
+      recEl.innerHTML = '<p class="empty-state">No plays meeting threshold for current filters.</p>';
+    }
   }
 
   const countEl = document.getElementById('rec-count');

@@ -2,11 +2,19 @@
   "wins": 17,
   "losses": 11,
   "pushes": 0,
-  "net_units": 7.34,
-  "roi": 26.21,
+  "net_units": 7.337,
+  "roi": 26.2,
   "clv_pct": 0,
-  "pod_wins": 0,
+  "pod_wins": 4,
   "pod_losses": 0,
   "streak": "W1",
-  "last_updated": "2026-03-21"
+  "last_updated": "2026-03-21",
+  "pod_record": {
+    "NCAA_POD": "2-0",
+    "MLB_POD": "1-0",
+    "NHL_POD": "1-0",
+    "SOCCER_POD": "0-0 (PENDING)"
+  },
+  "model_record_note": "All picks EV >= 2%. Full Market View in results.json.",
+  "window_note": "3-15% edge window: +2.7u savings Mar 20 vs unfiltered"
 }

@@ -271,5 +271,53 @@
     "sample_fields": ["response[].id","response[].date","response[].teams.home.name","response[].teams.away.name","response[].scores.home","response[].scores.away","response[].status.short"],
     "reliability_score": 7,
     "notes": "API Sports hockey endpoint. NHL = league 57. Supplemental to official NHL API (which is preferred). Useful for odds data."
+  },
+  {
+    "sport": "SOCCER",
+    "category": "B",
+    "source": "API Sports — Football (Soccer) Fixtures + Odds",
+    "url_template": "https://v3.football.api-sports.io/fixtures?date={YYYY-MM-DD}&league={id}&season={YYYY}",
+    "auth_required": true,
+    "auth_header": "x-apisports-key: {APISPORTS_KEY}",
+    "free_tier_limit": "100 requests/day (free plan)",
+    "sample_fields": ["response[].fixture.id","response[].fixture.date","response[].teams.home.name","response[].teams.away.name","response[].goals.home","response[].goals.away","response[].fixture.status.short"],
+    "reliability_score": 8,
+    "notes": "API Sports soccer endpoint. Top leagues: EPL=39, La Liga=140, Serie A=135, Bundesliga=78, Ligue 1=61, MLS=253. Odds endpoint: /odds?fixture={id}&bookmaker=8 (Bet365)."
+  },
+  {
+    "sport": "NBA",
+    "category": "B",
+    "source": "API Sports — Basketball Fixtures + Odds",
+    "url_template": "https://v1.basketball.api-sports.io/games?date={YYYY-MM-DD}&league={id}&season={YYYY-YYYY}",
+    "auth_required": true,
+    "auth_header": "x-apisports-key: {APISPORTS_KEY}",
+    "free_tier_limit": "100 requests/day (free plan)",
+    "sample_fields": ["response[].id","response[].date","response[].teams.home.name","response[].teams.away.name","response[].scores.home.total","response[].scores.away.total"],
+    "reliability_score": 7,
+    "notes": "API Sports basketball endpoint. NBA = league 12, season format 2024-2025. Supplemental to ESPN NBA API."
+  },
+  {
+    "sport": "CRICKET",
+    "category": "B",
+    "source": "API Sports — Cricket Fixtures",
+    "url_template": "https://v1.cricket.api-sports.io/fixtures?date={YYYY-MM-DD}",
+    "auth_required": true,
+    "auth_header": "x-apisports-key: {APISPORTS_KEY}",
+    "free_tier_limit": "100 requests/day (free plan)",
+    "sample_fields": ["response[].fixture.id","response[].fixture.date","response[].teams.home.name","response[].teams.away.name","response[].fixture.status.short"],
+    "reliability_score": 6,
+    "notes": "API Sports cricket endpoint. IPL = league 1, BBL = league 9, international = various. Limited historical odds coverage — use for live scores and scheduling."
+  },
+  {
+    "sport": "HANDBALL",
+    "category": "B",
+    "source": "API Sports — Handball Fixtures",
+    "url_template": "https://v1.handball.api-sports.io/games?date={YYYY-MM-DD}&league={id}&season={YYYY}",
+    "auth_required": true,
+    "auth_header": "x-apisports-key: {APISPORTS_KEY}",
+    "free_tier_limit": "100 requests/day (free plan)",
+    "sample_fields": ["response[].id","response[].date","response[].teams.home.name","response[].teams.away.name","response[].scores.home","response[].scores.away"],
+    "reliability_score": 6,
+    "notes": "API Sports handball endpoint. EHF Champions League = league 4, Bundesliga = league 12, Liga ASOBAL = league 6. Odds thin — combine with OddsAPI for market coverage."
   }
 ]

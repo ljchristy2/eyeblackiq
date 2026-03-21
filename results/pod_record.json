@@ -1,17 +1,17 @@
 {
   "NCAA_POD": {
-    "w": 1,
+    "w": 2,
     "l": 0,
     "p": 0,
-    "roi_pct": 16.7,
-    "units_net": 0.25,
+    "roi_pct": 60.8,
+    "units_net": 1.825,
     "streak_wl": {
       "type": "W",
-      "count": 1
+      "count": 2
     },
     "streak_units": {
       "direction": "positive",
-      "amount": 0.25
+      "amount": 1.825
     },
     "history": [
       {
@@ -20,6 +20,13 @@
         "status": "WIN",
         "units": 1.5,
         "result_value": 0.25
+      },
+      {
+        "date": "2026-03-21",
+        "pick": "Auburn ML",
+        "status": "WIN",
+        "units": 1.5,
+        "result_value": 1.575
       }
     ]
   },
@@ -48,26 +55,26 @@
     ]
   },
   "NHL_POD": {
-    "w": 0,
+    "w": 1,
     "l": 0,
     "p": 0,
-    "roi_pct": 0.0,
-    "units_net": 0.0,
+    "roi_pct": 98.0,
+    "units_net": 1.961,
     "streak_wl": {
-      "type": null,
-      "count": 0
+      "type": "W",
+      "count": 1
     },
     "streak_units": {
-      "direction": null,
-      "amount": 0.0
+      "direction": "positive",
+      "amount": 1.961
     },
     "history": [
       {
         "date": "2026-03-20",
         "pick": "Darren Raddysh u2.5 Shots on Goal",
-        "status": "PENDING",
+        "status": "WIN",
         "units": 2.0,
-        "result_value": null
+        "result_value": 1.961
       }
     ]
   },

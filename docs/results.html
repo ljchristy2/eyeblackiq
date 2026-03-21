@@ -185,6 +185,7 @@
     <button class="tab-btn active" onclick="switchTab('daily')">Daily Results</button>
     <button class="tab-btn" onclick="switchTab('running')">Running Record</button>
     <button class="tab-btn" onclick="switchTab('pod')">POD History</button>
+    <button class="tab-btn" onclick="switchTab('fmv')">Full Market View</button>
   </div>
 
   <!-- TAB 1: DAILY RESULTS -->
@@ -253,6 +254,46 @@
     </div>
   </div>
 
+  <!-- TAB 4: FULL MARKET VIEW -->
+  <div class="tab-content" id="tab-fmv">
+    <p style="color:var(--muted,#888);font-size:12px;margin-bottom:16px;padding:12px;background:var(--panel,#141414);border-radius:4px;border-left:3px solid var(--gold,#B8960C);">
+      <strong style="color:var(--gold,#B8960C);">Full Market View</strong> — Every pick the model analyzed, including plays outside the recommended edge window. These are <em>not</em> official plays. Displayed for model calibration and full transparency. No units attached to flagged picks.
+    </p>
+    <!-- FMV filter -->
+    <div class="results-filter-bar" style="margin-bottom:12px;">
+      <span class="filter-label">SHOW</span>
+      <button class="rf-btn active" data-fmv="all" onclick="fmvFilter(this,'all')">All</button>
+      <button class="rf-btn" data-fmv="recommended" onclick="fmvFilter(this,'recommended')">Recommended Only</button>
+      <button class="rf-btn" data-fmv="flagged" onclick="fmvFilter(this,'flagged')">Flagged Only</button>
+      <span class="filter-label" style="margin-left:8px;">SPORT</span>
+      <button class="rf-btn active" data-fmvsport="ALL" onclick="fmvSportFilter(this,'ALL')">All</button>
+      <button class="rf-btn" data-fmvsport="NCAA" onclick="fmvSportFilter(this,'NCAA')">NCAA</button>
+      <button class="rf-btn" data-fmvsport="MLB" onclick="fmvSportFilter(this,'MLB')">MLB</button>
+      <button class="rf-btn" data-fmvsport="NHL" onclick="fmvSportFilter(this,'NHL')">NHL</button>
+      <button class="rf-btn" data-fmvsport="SOCCER" onclick="fmvSportFilter(this,'SOCCER')">Soccer</button>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Date</th><th>Sport</th><th>Pick</th><th>Line</th>
+            <th>Edge %</th><th>Status</th><th>Flagged</th><th>Actual</th>
+          </tr>
+        </thead>
+        <tbody id="fmv-tbody">
+          <tr><td colspan="8" style="color:var(--text-dim);text-align:center;padding:32px;">Loading full market view...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <!-- Window analysis callout -->
+    <div id="fmv-window-note" style="display:none;margin-top:16px;padding:12px 16px;background:rgba(184,150,12,0.08);border:1px solid rgba(184,150,12,0.3);border-radius:4px;font-size:12px;color:#ccc;">
+      <strong style="color:var(--gold,#B8960C);">Edge Window Analysis — Mar 20:</strong>
+      Recommended picks (3–15% edge): <span style="color:#2ecc71;">14W-8L +7.96u</span> ·
+      Flagged picks (outside window): <span style="color:var(--red,#DC143C);">2W-4L −2.69u</span> ·
+      <strong>Window savings: +2.69u</strong> · The filter is working.
+    </div>
+  </div>
+
   <div class="disclaimer">
     All lines recorded at time of posting. Results verified against official scores.<br>
     EyeBlackIQ is for informational and entertainment purposes only.
@@ -275,15 +316,20 @@
 </footer>
 
 <script>
+const TABS = ['daily','running','pod','fmv'];
 // ── Tab switching ─────────────────────────────────────────────────────────────
 function switchTab(tab) {
   document.querySelectorAll('.tab-btn').forEach((b, i) => {
-    b.classList.toggle('active', ['daily','running','pod'][i] === tab);
+    b.classList.toggle('active', TABS[i] === tab);
   });
-  ['tab-daily','tab-running','tab-pod'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.classList.toggle('active', id === 'tab-' + tab);
+  TABS.forEach(t => {
+    const el = document.getElementById('tab-' + t);
+    if (el) el.classList.toggle('active', t === tab);
   });
+  if (tab === 'fmv') {
+    const note = document.getElementById('fmv-window-note');
+    if (note && _fmvAllData.length > 0) note.style.display = 'block';
+  }
 }
 
 // ── Filter state ──────────────────────────────────────────────────────────────
@@ -504,19 +550,98 @@ async function loadRecord() {
   } catch(e) {}
 }
 
+// ── FMV state + filters ───────────────────────────────────────────────────────
+let _fmvAllData = [];
+let _fmvShow = 'all';
+let _fmvSport = 'ALL';
+
+function fmvFilter(btn, val) {
+  document.querySelectorAll('[data-fmv]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  _fmvShow = val;
+  renderFMV(_fmvAllData);
+}
+function fmvSportFilter(btn, val) {
+  document.querySelectorAll('[data-fmvsport]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  _fmvSport = val;
+  renderFMV(_fmvAllData);
+}
+
+function renderFMV(items) {
+  const tbody = document.getElementById('fmv-tbody');
+  if (!tbody) return;
+  if (!items || !items.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="color:var(--text-dim);text-align:center;padding:32px;">No full market view data available.</td></tr>';
+    return;
+  }
+  let filtered = items;
+  if (_fmvSport !== 'ALL') filtered = filtered.filter(p => (p.sport||'').toUpperCase().includes(_fmvSport));
+  if (_fmvShow === 'recommended') filtered = filtered.filter(p => !p.is_flagged && (p.units||0) > 0);
+  if (_fmvShow === 'flagged')     filtered = filtered.filter(p => p.is_flagged || (p.units||0) === 0);
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="color:var(--text-dim);text-align:center;padding:32px;">No picks match current filter.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = filtered.map(p => {
+    const isFlagged = p.is_flagged || (p.units||0) === 0;
+    const flagCell  = isFlagged
+      ? `<span style="font-size:10px;padding:2px 6px;background:rgba(220,20,60,0.15);color:var(--red,#DC143C);border-radius:2px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">FLAGGED</span>`
+      : `<span style="font-size:10px;padding:2px 6px;background:rgba(74,144,217,0.15);color:#4A90D9;border-radius:2px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">REC</span>`;
+    const statusBadge = resultBadge(p.status);
+    const ev = p.ev_pct != null ? `${p.ev_pct >= 0 ? '+' : ''}${Number(p.ev_pct).toFixed(1)}%` : '—';
+    const lineStr = p.line != null ? (Number(p.line) > 0 ? '+' + p.line : p.line) : '—';
+    const rowStyle = isFlagged ? 'opacity:0.7;' : '';
+    return `<tr style="${rowStyle}">
+      <td style="color:var(--text-dim);font-size:12px;">${p.date||'—'}</td>
+      <td style="color:var(--text-dim);font-size:12px;">${p.sport||'—'}</td>
+      <td style="font-family:'Bebas Neue',sans-serif;font-size:16px;">${p.pick||'—'}</td>
+      <td style="color:var(--blue);font-family:'Barlow Condensed',sans-serif;">${lineStr}</td>
+      <td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:${(p.ev_pct||0)>=0?'#2ecc71':'var(--red,#DC143C)'};">${ev}</td>
+      <td>${statusBadge}</td>
+      <td>${flagCell}</td>
+      <td style="color:var(--text-dim);font-size:12px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.actual_val||'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Tier color from name (fallback for picks missing tier_color) ──────────────
+const TIER_COLOR_MAP = {
+  'FILTHY':'#DC143C','SNIPE':'#DC143C','UPPER 90':'#DC143C','SCREAMER':'#DC143C',
+  'WHEELHOUSE':'#4A90D9','SLOT MACHINE':'#4A90D9','SLOT_MACHINE':'#4A90D9',
+  'CHEEKY':'#4A90D9','FAST BREAK':'#4A90D9','CONVICTION':'#4A90D9',
+  'SCOUT':'#B8960C','MONITOR':'#B8960C','ON RADAR':'#555555','ON_RADAR':'#555555',
+  'FLAGGED':'#333333',
+};
+function tierColor(tier) {
+  if (!tier) return '#555555';
+  const t = tier.toUpperCase().replace(/[🟡🔴🟢]/g,'').trim();
+  for (const [k,v] of Object.entries(TIER_COLOR_MAP)) { if (t.includes(k)) return v; }
+  return '#555555';
+}
+
 // ── Main load ─────────────────────────────────────────────────────────────────
 async function loadResults() {
   try {
     const data = await fetch('data/results.json?t=' + Date.now()).then(r => r.json());
-    allPicks = data.picks || [];
+    // Ensure tier_color is set on every pick
+    allPicks = (data.picks || []).map(p => ({
+      ...p,
+      tier_color: p.tier_color || tierColor(p.tier),
+      tier: (p.tier||'').replace(/[🟡🔴🟢]/g,'').trim(),
+    }));
+    _fmvAllData = data.full_market_view || [];
     renderDaily(allPicks);
     renderRunning(data.daily_summaries || []);
     renderPOD(data.pod_picks || []);
     renderPodBadges(data.pod_picks || []);
+    renderFMV(_fmvAllData);
   } catch(e) {
-    ['daily-tbody','running-tbody','pod-tbody'].forEach((id, i) => {
+    console.error('loadResults error:', e);
+    ['daily-tbody','running-tbody','pod-tbody','fmv-tbody'].forEach((id, i) => {
       const el = document.getElementById(id);
-      if (el) el.innerHTML = `<tr><td colspan="${i === 0 ? 9 : i === 1 ? 7 : 8}" style="color:var(--text-dim);text-align:center;padding:32px;">No results posted yet. Check back after the first game day.</td></tr>`;
+      const cols = [9,7,8,8][i];
+      if (el) el.innerHTML = `<tr><td colspan="${cols}" style="color:var(--text-dim);text-align:center;padding:32px;">No results posted yet. Check back after the first game day.</td></tr>`;
     });
   }
 }

@@ -259,14 +259,14 @@ def clean_tier(tier: str) -> str:
 
 
 def export_results(limit: int = 200) -> list:
-    """Returns graded results (all recommended picks), including loss analysis data."""
+    """Returns graded results (all recommended picks, units > 0), including loss analysis data."""
     with get_conn() as conn:
         conn.row_factory = sqlite3.Row
         cur = conn.execute(
             """SELECT r.signal_date, r.sport, r.game, r.side, r.market,
                       r.odds, r.units, r.result, r.units_net,
                       r.actual_val, r.closing_line, r.clv, r.graded_at,
-                      s.notes, s.tier, s.ev, s.is_pod, s.pod_sport
+                      s.notes, s.tier, s.ev, s.is_pod, s.pod_sport, s.edge
                FROM results r
                LEFT JOIN signals s ON s.id = r.signal_id
                WHERE r.result IN ('WIN','LOSS','PUSH','VOID')
@@ -368,6 +368,40 @@ def export_daily_summaries() -> list:
     return summaries
 
 
+def export_full_market_view(limit: int = 500) -> list:
+    """
+    Returns ALL graded picks (recommended + flagged) for the Full Market View tab.
+    Includes units=0 (flagged) picks that are excluded from main results display.
+    """
+    with get_conn() as conn:
+        conn.row_factory = sqlite3.Row
+        cur = conn.execute(
+            """SELECT r.signal_date as date, r.sport, r.side as pick, r.market,
+                      r.odds as line, r.units, r.result as status, r.units_net,
+                      r.actual_val, s.tier, s.ev, s.edge, s.notes, s.is_pod
+               FROM results r
+               LEFT JOIN signals s ON s.id = r.signal_id
+               WHERE r.result IN ('WIN','LOSS','PUSH','VOID')
+               ORDER BY r.signal_date DESC, r.id DESC
+               LIMIT ?""",
+            (limit,)
+        )
+        rows = [dict(r) for r in cur.fetchall()]
+
+    for r in rows:
+        r["is_flagged"] = (r.get("units") or 0) == 0
+        r["tier_color"] = tier_color(r.get("tier") or "")
+        r["tier"]       = clean_tier(r.get("tier") or "")
+        edge_val        = r.get("edge") or 0
+        r["edge_pct"]   = round(edge_val * 100, 2)
+        ev_val          = r.get("ev") or 0
+        r["ev_pct"]     = round(ev_val * 100, 2)
+        # Remove raw edge/ev to avoid confusion with the formatted versions
+        r.pop("edge", None)
+        r.pop("ev", None)
+    return rows
+
+
 def export_pod_picks(limit: int = 100) -> list:
     """Returns all graded POD picks."""
     with get_conn() as conn:
@@ -406,13 +440,15 @@ def run_export(date_str: str):
     picks      = export_results(200)
     summaries  = export_daily_summaries()
     pod_picks  = export_pod_picks(100)
+    fmv        = export_full_market_view(500)
 
     write_json(DOCS_DATA / "today_slip.json", slip)
     write_json(DOCS_DATA / "record.json",     record)
     write_json(DOCS_DATA / "results.json",    {
-        "picks":           picks,
-        "daily_summaries": summaries,
-        "pod_picks":       pod_picks,
+        "picks":             picks,
+        "daily_summaries":   summaries,
+        "pod_picks":         pod_picks,
+        "full_market_view":  fmv,
     })
 
     logger.info(

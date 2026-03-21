@@ -1,17 +1,21 @@
 """
 EyeBlackIQ — approve_pod.py
-Flip PENDING_APPROVAL -> APPROVED in picks_today.json (or docs/data/today_slip.json).
+Flip PENDING_APPROVAL -> APPROVED in docs/data/today_slip.json.
 Logs all approvals to /results/pod_approvals.json.
+Optionally rebuilds the website and pushes to GitHub Pages.
 
 Usage:
-  python approve_pod.py --date 2026-03-21 --sport NCAA
-  python approve_pod.py --date 2026-03-21 --sport MLB
   python approve_pod.py --list              # Show pending PODs
+  python approve_pod.py --sport NCAA        # Approve NCAA POD
+  python approve_pod.py --sport MLB --push  # Approve + rebuild + git push
+  python approve_pod.py --sport NHL --rebuild  # Approve + rebuild (no push)
 """
 import json
 import argparse
 import logging
 import os
+import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from dotenv import load_dotenv
@@ -88,11 +92,46 @@ def approve_pod(date_str: str, sport: str) -> bool:
     return True
 
 
+def rebuild_site(date_str: str) -> bool:
+    """Re-run export.py to refresh all JSON data files."""
+    export_script = BASE_DIR / "pipeline" / "export.py"
+    if not export_script.exists():
+        logger.error(f"export.py not found at {export_script}")
+        return False
+    result = subprocess.run(
+        [sys.executable, str(export_script), "--date", date_str],
+        capture_output=True, text=True
+    )
+    if result.returncode != 0:
+        logger.error(f"export.py failed:\n{result.stderr}")
+        return False
+    logger.info("Site data rebuilt successfully")
+    return True
+
+
+def git_push(commit_msg: str) -> bool:
+    """Stage docs/data changes and push to GitHub Pages."""
+    try:
+        subprocess.run(["git", "-C", str(BASE_DIR), "add", "docs/data/"],
+                       check=True, capture_output=True)
+        subprocess.run(["git", "-C", str(BASE_DIR), "commit", "-m", commit_msg],
+                       check=True, capture_output=True)
+        subprocess.run(["git", "-C", str(BASE_DIR), "push"],
+                       check=True, capture_output=True)
+        logger.info("Pushed to GitHub Pages")
+        return True
+    except subprocess.CalledProcessError as e:
+        logger.error(f"git push failed: {e.stderr.decode() if e.stderr else e}")
+        return False
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Approve EyeBlackIQ POD pick")
-    parser.add_argument("--date",  default=datetime.now().strftime("%Y-%m-%d"))
-    parser.add_argument("--sport", default=None, help="NCAA | MLB | NHL | SOCCER")
-    parser.add_argument("--list",  action="store_true", help="List pending PODs")
+    parser.add_argument("--date",    default=datetime.now().strftime("%Y-%m-%d"))
+    parser.add_argument("--sport",   default=None, help="NCAA | MLB | NHL | SOCCER")
+    parser.add_argument("--list",    action="store_true", help="List pending PODs")
+    parser.add_argument("--rebuild", action="store_true", help="Rebuild site data after approval")
+    parser.add_argument("--push",    action="store_true", help="Rebuild + git push after approval")
     args = parser.parse_args()
 
     slip = _load_json(SLIP_PATH)
@@ -106,4 +145,13 @@ if __name__ == "__main__":
                 print(f"  [{p.get('sport','?')}]  {p.get('pick','?')}  {p.get('odds','?')}  {p.get('units','?')}u  EV={p.get('edge','?')}%")
     else:
         ok = approve_pod(args.date, args.sport)
-        print("APPROVED" if ok else "FAILED — check logs")
+        if ok:
+            print("APPROVED")
+            if args.push or args.rebuild:
+                rebuilt = rebuild_site(args.date)
+                print("Site rebuilt" if rebuilt else "Rebuild FAILED — check logs")
+                if args.push and rebuilt:
+                    pushed = git_push(f"chore: approve {args.sport.upper()} POD {args.date}")
+                    print("Pushed to GitHub Pages" if pushed else "Push FAILED — push manually")
+        else:
+            print("FAILED — check logs")
