@@ -6,6 +6,41 @@
 <title>Methodology — EyeBlackIQ</title>
 <link rel="stylesheet" href="style.css">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+.method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1100px; margin: 0 auto 40px; padding: 0 20px; }
+@media(max-width: 700px) { .method-grid { grid-template-columns: 1fr; } }
+.method-card { background: #111; border: 1px solid #1c1c1c; border-radius: 10px; padding: 22px 24px; }
+.method-card-title { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 700; color: #DC143C; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
+.method-card p { font-size: 14px; color: #aaa; line-height: 1.7; margin-bottom: 10px; }
+.method-card p:last-child { margin-bottom: 0; }
+.method-card code { background: #1a1a1a; color: #6ab0e8; padding: 2px 6px; border-radius: 3px; font-size: 12px; }
+.method-card ul { list-style: none; padding: 0; }
+.method-card li { font-size: 13px; color: #999; padding: 5px 0; border-bottom: 1px solid #1a1a1a; }
+.method-card li:last-child { border-bottom: none; }
+.method-card li::before { content: '→ '; color: #DC143C; }
+.method-hero { text-align: center; padding: 40px 20px 30px; max-width: 800px; margin: 0 auto; }
+.method-hero h1 { font-family: 'Bebas Neue', sans-serif; font-size: 42px; color: #f0ede8; letter-spacing: 2px; margin-bottom: 12px; }
+.method-hero p { font-size: 16px; color: #888; line-height: 1.7; }
+.tier-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+.tier-table th { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: 1px; padding: 6px 8px; text-align: left; border-bottom: 1px solid #1c1c1c; }
+.tier-table td { padding: 8px 8px; font-size: 13px; border-bottom: 1px solid #161616; }
+.tier-table tr:last-child td { border-bottom: none; }
+.t-red  { color: #DC143C; font-weight: 700; }
+.t-blue { color: #4A90D9; font-weight: 700; }
+.t-gold { color: #B8960C; font-weight: 700; }
+.t-grey { color: #444; }
+.gate-list { counter-reset: gates; list-style: none; padding: 0; }
+.gate-list li { counter-increment: gates; padding: 8px 0 8px 36px; position: relative; font-size: 13px; color: #999; border-bottom: 1px solid #161616; }
+.gate-list li:last-child { border-bottom: none; }
+.gate-list li::before { content: counter(gates); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #1a1a1a; border: 1px solid #333; border-radius: 50%; font-size: 11px; font-weight: 700; color: #DC143C; display: flex; align-items: center; justify-content: center; }
+.conf-row { display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap; }
+.conf-pill { padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 700; font-family: 'Barlow Condensed', sans-serif; }
+.cp-high { background: rgba(60,179,113,0.15); color: #3cb371; border: 1px solid rgba(60,179,113,0.3); }
+.cp-med  { background: rgba(74,144,217,0.12); color: #6ab0e8; border: 1px solid rgba(74,144,217,0.25); }
+.cp-low  { background: rgba(100,100,100,0.15); color: #666; border: 1px solid #333; }
+.section-divider { max-width: 1100px; margin: 0 auto 30px; padding: 0 20px; }
+.section-divider h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; color: #f0ede8; letter-spacing: 1px; margin-bottom: 6px; border-bottom: 1px solid #1c1c1c; padding-bottom: 10px; }
+</style>
 </head>
 <body>
 
@@ -15,7 +50,7 @@
       <span class="logo-eb">EB</span>
       <div class="logo-text">
         <span class="logo-name">EyeBlackIQ</span>
-        <span class="logo-tag">NCAA Baseball Prediction Model</span>
+        <span class="logo-tag">Multi-Sport Prediction Model</span>
       </div>
     </div>
     <nav>
@@ -31,130 +66,221 @@
 </header>
 
 <main>
-  <div class="results-header">
-    <div class="results-title">The Model</div>
-    <div class="results-sub">How EyeBlackIQ finds where the market is wrong</div>
+
+  <div class="method-hero">
+    <h1>How EyeBlackIQ Works</h1>
+    <p>
+      Eye black eliminates glare. It sharpens focus under pressure and lets you see what others can't.
+      That's what this model does — it processes every available game through a multi-layer quantitative
+      framework and identifies where the market has mispriced a team.
+    </p>
   </div>
 
-  <!-- WHAT WE DO -->
-  <div class="method-section">
-    <div class="method-title">What EyeBlackIQ Does</div>
-    <div class="method-body">
-      <p>
-        Eye black eliminates glare. It sharpens focus under pressure and lets you see what others can't.
-        That's exactly what this model does.
-      </p>
-      <p>
-        On any given day, there are 300+ NCAA baseball games being played. The market sets lines on all
-        of them — but the market isn't always right. EyeBlackIQ processes every available game, runs
-        each one through a multi-factor model, and identifies where the opening or closing line
-        represents a mispricing. That mispricing is the edge. That edge is what we post.
-      </p>
-      <p>
-        We don't predict winners. We find where the market is wrong.
-      </p>
+  <!-- SPORTS COVERED -->
+  <div class="section-divider"><h2>Sports Covered</h2></div>
+  <div class="method-grid">
+    <div class="method-card">
+      <div class="method-card-title">⚾ NCAA Baseball</div>
+      <p>Primary focus. Team ML signals using ELO ratings, ISR (Iterative Strength Ratings),
+         and SP ERA adjustments. Updated daily with the latest D1 rankings.</p>
+      <ul>
+        <li>ELO head-to-head probability (HFA = +25 pts)</li>
+        <li>ISR normalized win probability blend (40%)</li>
+        <li>Starting pitcher ERA adjustment (±run line shift)</li>
+        <li>Run line alternative surfaced when ML > +250</li>
+      </ul>
+    </div>
+    <div class="method-card">
+      <div class="method-card-title">🏒 NHL · ⚾ MLB · ⚽ Soccer</div>
+      <p>Team ML and player prop signals for NHL (SOG/PTS/AST), MLB (pitcher Ks, F5 results),
+         and Soccer (1X2, SOT, Goals). Same quantitative rigor as NCAA baseball.</p>
+      <ul>
+        <li>NHL: MoneyPuck xG data + NHL API stats</li>
+        <li>MLB: Statcast / pybaseball (Spring Training calibration through 3/26)</li>
+        <li>Soccer: Club Elo API + Understat xG + football-data.co.uk</li>
+      </ul>
     </div>
   </div>
 
-  <!-- HOW IT WORKS -->
-  <div class="method-section">
-    <div class="method-title">How It Works</div>
-    <div class="method-body">
-      <p>
-        The model evaluates each game across multiple weighted factors including pitching metrics,
-        schedule-adjusted performance ratings, recent team form, ballpark context, and line movement.
-        Each factor contributes to a composite score that determines whether a line represents positive
-        expected value — and if so, how much.
-      </p>
-      <p>
-        Picks are generated only when a market line is available. EyeBlackIQ does not post phantom picks
-        or retroactive predictions. If the model sees no edge in a game, nothing gets posted. Discipline
-        is part of the model.
-      </p>
-      <p>
-        The full proprietary formula is not published. What is published — every single day — is the
-        result. The record speaks for itself.
-      </p>
+  <!-- THE MODEL PIPELINE -->
+  <div class="section-divider"><h2>The Model Pipeline</h2></div>
+  <div class="method-grid">
+    <div class="method-card">
+      <div class="method-card-title">Step 1 — Strength Ratings</div>
+      <p>Two independent rating systems are computed for every team:</p>
+      <ul>
+        <li><strong>ELO</strong> — Elo rating updated after every game. Head-to-head win probability
+            uses <code>P = 1 / (1 + 10^(-Δ/400))</code>. Home field advantage = +25 ELO pts.</li>
+        <li><strong>ISR</strong> — Iterative Strength Rating converges to a stable power-ranking
+            via repeated margin-of-victory regression. Updated weekly.</li>
+      </ul>
+      <p>Blend: <code>60% ELO + 40% ISR</code>. The gap between ELO and ISR directly drives the confidence level.</p>
+    </div>
+    <div class="method-card">
+      <div class="method-card-title">Step 2 — Market Edge</div>
+      <p>Model probability is compared to the no-vig (fair) market probability.</p>
+      <p>Devig method: <code>imp = abs(o)/(abs(o)+100)</code> then normalize two-way to 100%.</p>
+      <p><strong>Edge = Model% − Market%</strong></p>
+      <p>Only positive edge signals advance to tier assignment. The market isn't
+         always wrong — the model only acts when there's a measurable discrepancy.</p>
+    </div>
+    <div class="method-card">
+      <div class="method-card-title">Step 3 — SP ERA Adjustment (Baseball)</div>
+      <p>Starting pitcher quality shifts team win probability based on ERA vs. league average (5.70).</p>
+      <p>Formula: <code>r = 5.0 × SP_ERA / 5.70</code> (capped 1–9 runs)</p>
+      <p>ERA adjustment: <code>(r_away − r_home) / 20</code> added to home win probability.</p>
+      <p>A dominant home SP (ERA 2.50) vs. shaky away SP (ERA 6.20) can shift p_home by ~3-4pp.</p>
+    </div>
+    <div class="method-card">
+      <div class="method-card-title">Step 4 — 5-Gate Filter</div>
+      <p>Every signal must pass all five gates in sequence. Any failure blocks the pick.</p>
+      <ol class="gate-list">
+        <li>Pythagorean gate — team performance vs. expected (GREEN or cleared YELLOW)</li>
+        <li>Edge ≥ 2% above no-vig fair probability</li>
+        <li>ELO and ISR models agree within 15pp</li>
+        <li>Line has not moved &gt;0.5 units sharp-direction against model</li>
+        <li>ETL data timestamp &lt; 4 hours old</li>
+      </ol>
     </div>
   </div>
 
   <!-- TIER SYSTEM -->
-  <div class="method-section">
-    <div class="method-title">The Tier System</div>
-    <div class="method-body">
-      <p>Every pick is assigned a tier based on model confidence and calculated edge size.</p>
+  <div class="section-divider"><h2>Tier System &amp; Bet Sizing</h2></div>
+  <div class="method-grid">
+    <div class="method-card">
+      <div class="method-card-title">Tier Thresholds</div>
+      <table class="tier-table">
+        <tr><th>Tier</th><th>Edge</th><th>Units</th><th>NCAA / MLB</th><th>NHL</th><th>Soccer</th></tr>
+        <tr><td class="t-red">T1</td><td class="t-red">≥12%</td><td class="t-red">2.0u</td><td class="t-red">FILTHY</td><td class="t-red">SNIPE</td><td class="t-red">UPPER 90</td></tr>
+        <tr><td class="t-blue">T2</td><td class="t-blue">≥5%</td><td class="t-blue">1.5u</td><td class="t-blue">WHEELHOUSE</td><td class="t-blue">SLOT MACHINE</td><td class="t-blue">CHEEKY</td></tr>
+        <tr><td class="t-gold">T3</td><td class="t-gold">≥2%</td><td class="t-gold">1.0u</td><td class="t-gold">SCOUT</td><td class="t-gold">SCOUT</td><td class="t-gold">SCOUT</td></tr>
+        <tr><td class="t-grey">T4</td><td class="t-grey">&lt;2%</td><td class="t-grey">0u</td><td class="t-grey">BALK</td><td class="t-grey">ICING</td><td class="t-grey">PARK THE BUS</td></tr>
+      </table>
     </div>
-    <div class="tier-explainer">
-      <div class="tier-row conviction">
-        <span class="tier-emoji">🔥</span>
-        <div>
-          <div class="tier-info-name">Conviction</div>
-          <div class="tier-info-desc">
-            Maximum edge detected. The model is locked in. This is where the strongest
-            expected value lives and where unit allocation is highest. Conviction picks
-            are tracked separately and form the core of the season record.
-          </div>
-        </div>
-      </div>
-      <div class="tier-row value">
-        <span class="tier-emoji">📈</span>
-        <div>
-          <div class="tier-info-name">Value</div>
-          <div class="tier-info-desc">
-            Clear edge is present. The line has soft spots the model has identified.
-            Strong plays with real expected value — not maximum confidence, but not a
-            guess either. Solid unit allocation.
-          </div>
-        </div>
-      </div>
-      <div class="tier-row lean">
-        <span class="tier-emoji">👀</span>
-        <div>
-          <div class="tier-info-name">Lean</div>
-          <div class="tier-info-desc">
-            The model sees something. Expected value exists but confidence is moderate.
-            Lower unit allocation. Worth watching. Not worth max bet.
-          </div>
-        </div>
-      </div>
+    <div class="method-card">
+      <div class="method-card-title">Kelly Sizing</div>
+      <p>All units are sized using <strong>Quarter Kelly</strong> with a hard bankroll cap.</p>
+      <ul>
+        <li>Kelly fraction: <code>0.25</code> (1/4 of full Kelly)</li>
+        <li>Hard cap: <code>3%</code> of bankroll per bet</li>
+        <li>Daily maximum: <code>15 bets</code></li>
+        <li>1 unit = 1% of bankroll (e.g. 2.0u = 2% of bankroll)</li>
+      </ul>
+      <p>Units are set by tier, not raw Kelly — the tier floor ensures minimum sizing when edge is confirmed.
+         Kelly is used as a ceiling check only.</p>
     </div>
   </div>
 
-  <!-- POD -->
-  <div class="method-section">
-    <div class="method-title">Pick Of The Day</div>
-    <div class="method-body">
-      <p>
-        One pick. The highest-confidence, highest-edge play on the full card. POD comes exclusively
-        from the CONVICTION tier — never forced, never manufactured.
+  <!-- CONFIDENCE LEVELS -->
+  <div class="section-divider"><h2>Confidence Levels</h2></div>
+  <div class="method-grid">
+    <div class="method-card" style="grid-column: span 2;">
+      <div class="method-card-title">What Confidence Means — and Why Tier Comes First</div>
+      <p>Confidence is a grounded signal about <em>how well-supported</em> this particular signal is —
+         not whether it's a good bet. It's built from objective inputs, not gut feel.</p>
+      <div class="conf-row">
+        <div class="conf-pill cp-high">●●● HIGH — 5+ SP starts + ELO/ISR agree within 5pp</div>
+        <div class="conf-pill cp-med">●●○ MED — 2-4 SP starts or 5-10pp model gap</div>
+        <div class="conf-pill cp-low">●○○ LOW — TBD SP, &lt;2 starts, or &gt;10pp gap</div>
+      </div>
+      <p style="margin-top: 16px;">
+        <strong>Critical distinction:</strong> Tier (edge%) determines your stake. Confidence tells you
+        how reliable the underlying model inputs are. A FILTHY pick at MED confidence still has 12%+ edge
+        — that's a significantly larger expected value than a SCOUT at HIGH confidence with 2.4% edge.
       </p>
       <p>
-        On days where no CONVICTION pick exists, there is no POD. Scarcity is intentional.
-        The POD record is tracked separately from the full card record. Over time, it becomes
-        the most meaningful single metric EyeBlackIQ publishes.
-      </p>
-    </div>
-  </div>
-
-  <!-- TRANSPARENCY -->
-  <div class="method-section">
-    <div class="method-title">Transparency</div>
-    <div class="method-body">
-      <p>
-        Every pick is posted with the live market line at time of posting. Every result is recorded
-        with the final score. Every loss is posted with the same visibility as every win.
-        The full record — wins, losses, pushes, net units, ROI — is updated daily and published here.
+        <strong>Example:</strong> BYU +1400 FILTHY 2.0u LOW ●○○ (23.9% edge) vs. Auburn +105 WHEELHOUSE
+        1.5u HIGH ●●● (6.2% edge). BYU's edge is nearly 4× larger. LOW confidence signals <em>that SP data
+        is limited</em> — not that the edge is fabricated. Auburn's HIGH confidence reflects strong model
+        agreement and confirmed SP starts. Both are legitimate bets; stake them accordingly.
       </p>
       <p>
-        The season never lies.
+        <strong>POD Rule:</strong> Pick of the Day requires HIGH confidence + WHEELHOUSE or better.
+        PODs are the face of the system — they should reflect our highest-conviction signals where both
+        the edge AND the model certainty are strong.
       </p>
     </div>
   </div>
 
-  <div class="disclaimer">
-    EyeBlackIQ is for entertainment purposes only.<br>
-    Gambling involves risk. Never bet more than you can afford to lose.
+  <!-- RUN LINE ALTERNATIVE -->
+  <div class="section-divider"><h2>Run Line / Spread Alternative</h2></div>
+  <div class="method-grid">
+    <div class="method-card" style="grid-column: span 2;">
+      <div class="method-card-title">When ML &gt; +250 — Consider the Spread</div>
+      <p>When the model finds significant edge on a big underdog (ML > +250), the system flags a
+         <strong>run line alternative</strong>. Instead of betting BYU at +1400 ML (where you need them
+         to actually win), you can bet BYU +1.5 runs at a much lower price (typically +300 to +500)
+         and still cash if they keep it close.</p>
+      <p>This is especially valuable for teams like BYU where our model says 30% win probability but
+         the market says 6% — the "surprise competitive game" outcome is more likely than outright victory.
+         The run line captures value from the team being competitive without requiring an upset.</p>
+      <p>Future feature: When ML edge &gt;15% on a big dog, the system will automatically surface the
+         run line as a separate bet with its own edge calculation against the offered run line odds.</p>
+    </div>
   </div>
+
+  <!-- KILL SWITCHES -->
+  <div class="section-divider"><h2>Risk Controls &amp; Kill Switches</h2></div>
+  <div class="method-grid">
+    <div class="method-card">
+      <div class="method-card-title">Automated Kill Switches</div>
+      <ul>
+        <li>3-month rolling CLV &lt; 0 → full suspension</li>
+        <li>25 consecutive losses → 72-hour review period</li>
+        <li>7 consecutive losing days → stakes reduced to 25% for 5 days</li>
+      </ul>
+    </div>
+    <div class="method-card">
+      <div class="method-card-title">Go-Live Standards</div>
+      <p>No model goes live for real-money betting until all four thresholds are cleared:</p>
+      <ul>
+        <li>Backtest ROI &gt; 3%</li>
+        <li>CLV (Closing Line Value) ≥ 55%</li>
+        <li>Calibration within ±2% across all probability bins</li>
+        <li>Minimum 300–500 sample bets in paper trading</li>
+      </ul>
+    </div>
+    <div class="method-card">
+      <div class="method-card-title">Closing Line Value (CLV)</div>
+      <p>CLV measures whether we're beating the closing line — the final market price after sharp
+         money has moved the line. Pinnacle closing line is our gold standard benchmark.</p>
+      <p>Beating the closing line at 55%+ rate is the strongest long-term profitability signal —
+         more reliable than win/loss record over small samples.</p>
+    </div>
+    <div class="method-card">
+      <div class="method-card-title">Current Status</div>
+      <p><strong>Phase:</strong> Active paper trading — calibrating models and tracking CLV.</p>
+      <p><strong>NCAA Baseball:</strong> Live signals since March 21, 2026. Tracking real-time.</p>
+      <p><strong>NHL / MLB / Soccer:</strong> Data aggregation and model validation in progress.</p>
+      <p><strong>Go-live target:</strong> 30 days paper trading + all 4 thresholds cleared per sport.</p>
+    </div>
+  </div>
+
+  <!-- DATA SOURCES -->
+  <div class="section-divider"><h2>Data Sources</h2></div>
+  <div class="method-grid">
+    <div class="method-card">
+      <div class="method-card-title">NCAA Baseball</div>
+      <ul>
+        <li>ELO ratings — updated weekly (Mar 21 as of today)</li>
+        <li>ISR ratings — updated weekly (Mar 21 as of today)</li>
+        <li>Conference ISR — context and matchup annotation</li>
+        <li>SP ERA data — scraped daily from ESPN / Warren Nolan</li>
+        <li>Market odds — TheRundown API (Pinnacle included)</li>
+      </ul>
+    </div>
+    <div class="method-card">
+      <div class="method-card-title">NHL / MLB / Soccer</div>
+      <ul>
+        <li>NHL: MoneyPuck CSV (xG, 2007+) · NHL official API</li>
+        <li>MLB: pybaseball / Baseball Savant · Statcast</li>
+        <li>Soccer: Club Elo API · Understat xG · football-data.co.uk</li>
+        <li>Live odds: TheRundown API free (20K calls/day, Pinnacle + 15 books)</li>
+        <li>Props: OddsAPI (MLB Ks, NHL SOG)</li>
+      </ul>
+    </div>
+  </div>
+
 </main>
 
 <footer>
@@ -167,7 +293,7 @@
       <a href="https://twitter.com/EyeBlackIQ" target="_blank">𝕏 Twitter</a>
       <a href="#">Telegram</a>
       <a href="#">Discord</a>
-      <a href="index.html">Today's Card</a>
+      <a href="index.html">Today's Picks</a>
       <a href="results.html">Results</a>
     </div>
     <div class="footer-copy">© 2026 EyeBlackIQ. Data beats hype.</div>

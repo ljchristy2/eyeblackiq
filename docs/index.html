@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EyeBlackIQ — NCAA Baseball Prediction Model</title>
+<title>EyeBlackIQ — Multi-Sport Prediction Model</title>
 <link rel="stylesheet" href="style.css">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
@@ -16,7 +16,7 @@
       <span class="logo-eb">EB</span>
       <div class="logo-text">
         <span class="logo-name">EyeBlackIQ</span>
-        <span class="logo-tag">NCAA Baseball Prediction Model</span>
+        <span class="logo-tag">ELO + ISR · 5-Gate Filter · Quarter Kelly Sizing</span>
       </div>
     </div>
     <nav>
@@ -64,7 +64,7 @@
 <!-- DATE LABEL -->
 <div class="date-bar">
   <span class="date-label" id="slip-date">Loading...</span>
-  <span class="date-sublabel">ELO+ISR Blend · 5-Gate Filter · Quarter Kelly</span>
+  <span class="date-sublabel">Model updated daily · All picks posted at time of signal · Bet responsibly</span>
 </div>
 
 <!-- SPORT TABS -->
@@ -74,6 +74,8 @@
   <button class="sport-tab" data-sport="NHL">🏒 NHL</button>
   <button class="sport-tab" data-sport="MLB">⚾ MLB</button>
   <button class="sport-tab" data-sport="SOCCER">⚽ SOCCER</button>
+  <button class="sport-tab" data-sport="PROPS">📊 PROPS</button>
+  <button class="sport-tab" data-sport="PICKEMS">🎯 PICKEMS</button>
 </div>
 
 <!-- MAIN -->
@@ -81,41 +83,27 @@
 
   <!-- POD ROW -->
   <section class="pods-section">
-    <h2 class="section-title">📌 Picks of the Day</h2>
+    <h2 class="section-title">📌 Pick of the Day <span class="pod-badge">HIGH ●●●</span></h2>
     <div class="pod-row" id="pod-row">
-      <p class="empty-state">Loading...</p>
+      <p class="empty-state">No POD picks today — requires HIGH confidence + WHEELHOUSE or better</p>
     </div>
   </section>
 
-  <!-- RECOMMENDED PICKS -->
+  <!-- TODAY'S PICKS -->
   <section class="picks-section">
     <h2 class="section-title">
-      Recommended Picks
+      Today's Picks
       <span class="count-badge" id="rec-count">0</span>
-      <span class="edge-window-label">Edge 3%–15%</span>
     </h2>
     <div class="picks-grid" id="picks-grid">
-      <p class="empty-state">Loading...</p>
+      <p class="empty-state">Loading picks...</p>
     </div>
-  </section>
-
-  <!-- FLAGGED PICKS (collapsible) -->
-  <section class="flagged-section collapsed" id="flagged-section">
-    <div class="flagged-header" id="flagged-header">
-      <h3 class="flagged-title">
-        ⚠️ Outside Edge Window
-        <span class="count-badge count-grey" id="flagged-count">0</span>
-      </h3>
-      <span class="flagged-sublabel">Visible for reference — not in recommended tiers</span>
-      <button class="flagged-toggle" id="flagged-toggle">▼ Show</button>
-    </div>
-    <div class="flagged-list" id="flagged-list"></div>
   </section>
 
   <!-- DISCLAIMER -->
   <div class="disclaimer">
-    Market lines only. All picks posted with live lines at time of posting.<br>
-    EyeBlackIQ is for entertainment purposes only. Bet responsibly.
+    All picks shown at time of signal. Lines move — always verify before betting.<br>
+    EyeBlackIQ is for informational and entertainment purposes. Bet responsibly.
   </div>
 
 </main>
@@ -139,7 +127,7 @@
 </footer>
 
 <script>
-// ── Data loading ──────────────────────────────────────────────
+// ── Data loading ────────────────────────────────────────────────────
 async function loadData() {
   const [slipRes, recRes] = await Promise.all([
     fetch('data/today_slip.json').then(r => r.json()).catch(() => ({date:'', recommended:[], flagged:[], pod:[]})),
@@ -148,141 +136,164 @@ async function loadData() {
   return { slip: slipRes, record: recRes };
 }
 
-// ── Record bar ────────────────────────────────────────────────
+// ── Record bar ──────────────────────────────────────────────────────
 function updateRecordBar(rec) {
   const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
   set('bar-record',  `${rec.wins||0}-${rec.losses||0}-${rec.pushes||0}`);
-  const net = (rec.net_units||0);
+  const net = (rec.net_units || 0);
   set('bar-units',   `${net >= 0 ? '+' : ''}${net.toFixed(1)}u`);
   set('bar-roi',     `${(rec.roi||0) >= 0 ? '+' : ''}${(rec.roi||0).toFixed(1)}%`);
   set('bar-pod',     `${rec.pod_wins||0}-${rec.pod_losses||0}`);
   set('bar-streak',  rec.streak || '—');
 }
 
-// ── Tier colors ───────────────────────────────────────────────
+// ── Tier colors ─────────────────────────────────────────────────────
 const TIER_CSS = {
-  'FILTHY':       'tier-red',   'SNIPE':       'tier-red',   'UPPER 90':   'tier-red',   'SCREAMER': 'tier-red',
-  'WHEELHOUSE':   'tier-blue',  'SLOT MACHINE':'tier-blue',  'CHEEKY':     'tier-blue',  'FAST BREAK':'tier-blue',
-  'SCOUT':        'tier-gold',
-  'BALK':         'tier-grey',  'ICING':       'tier-grey',  'PARK THE BUS':'tier-grey', 'RED CARD': 'tier-grey',
-  'CONVICTION':   'tier-blue',
+  'FILTHY':        'tier-red',
+  'SNIPE':         'tier-red',
+  'UPPER 90':      'tier-red',
+  'SCREAMER':      'tier-red',
+  'WHEELHOUSE':    'tier-blue',
+  'SLOT MACHINE':  'tier-blue',
+  'CHEEKY':        'tier-blue',
+  'FAST BREAK':    'tier-blue',
+  'SCOUT':         'tier-gold',
 };
 function tierClass(tier) {
   if (!tier) return 'tier-grey';
+  const t = tier.toUpperCase();
   for (const [k, v] of Object.entries(TIER_CSS)) {
-    if (tier.toUpperCase().includes(k)) return v;
+    if (t.includes(k)) return v;
   }
   return 'tier-grey';
 }
 
-// ── Pick card ─────────────────────────────────────────────────
+// ── Confidence badge ────────────────────────────────────────────────
+function confBadge(conf_label, conf_sym) {
+  if (!conf_label || conf_label === 'MED') return '';
+  const cls = conf_label === 'HIGH' ? 'conf-high' : 'conf-low';
+  return `<span class="conf-badge ${cls}">${conf_sym || conf_label}</span>`;
+}
+
+// ── Pick card ────────────────────────────────────────────────────────
 function pickCard(pick) {
-  const edge = typeof pick.edge_pct !== 'undefined' ? pick.edge_pct : (pick.edge || 0);
-  const edgeSign = edge >= 0 ? '+' : '';
+  const edge  = typeof pick.edge_pct !== 'undefined' ? pick.edge_pct : (pick.edge || 0) * 100;
+  const sign  = edge >= 0 ? '+' : '';
   const tclass = tierClass(pick.tier || '');
-  const odds = pick.odds > 0 ? `+${pick.odds}` : `${pick.odds}`;
+  const odds  = pick.odds > 0 ? `+${pick.odds}` : `${pick.odds}`;
   const units = pick.units || 1.0;
-  const market = pick.market ? ` · ${pick.market}` : '';
-  const gameLine = pick.game ? `<div class="pick-game">${pick.game}${pick.game_time ? '  <span class="pick-time">' + pick.game_time + '</span>' : ''}</div>` : '';
+  const isPod = pick.is_pod;
+
+  // Confidence
+  const confHtml = confBadge(pick.conf_label, pick.conf_sym);
+
+  // Run line alternative
+  const rlHtml = pick.rl_alt
+    ? `<div class="pick-rl-alt">⚡ Consider run line (+1.5) as alternative vehicle</div>`
+    : '';
+
+  // Game / time
+  const gameHtml = pick.game
+    ? `<div class="pick-game">${pick.game}${pick.game_time ? `  <span class="pick-time">${pick.game_time}</span>` : ''}</div>`
+    : '';
+
+  // POD crown
+  const podTag = isPod ? `<span class="pod-crown">📌 POD</span>` : '';
 
   return `
-  <div class="pick-card ${tclass}">
+  <div class="pick-card ${tclass}${isPod ? ' pod-highlight' : ''}">
     <div class="pick-header">
       <span class="pick-tier">${pick.tier || '—'}</span>
-      <span class="pick-units">${units}u</span>
+      <div class="pick-header-right">
+        ${confHtml}
+        <span class="pick-units">${units}u</span>
+        ${podTag}
+      </div>
     </div>
-    <div class="pick-side">${pick.side || pick.pick || '—'}${market}</div>
+    <div class="pick-side">${pick.side || pick.pick || '—'}</div>
     <div class="pick-meta">
       <span class="pick-odds">${odds}</span>
-      <span class="pick-edge">Edge ${edgeSign}${Number(edge).toFixed(1)}%</span>
-      ${pick.ev ? `<span class="pick-ev">EV ${pick.ev >= 0 ? '+' : ''}${(pick.ev*100).toFixed(1)}%</span>` : ''}
+      <span class="pick-edge">Edge ${sign}${Number(edge).toFixed(1)}%</span>
+      ${pick.ev ? `<span class="pick-ev">EV ${pick.ev >= 0 ? '+' : ''}${(pick.ev * 100).toFixed(1)}%</span>` : ''}
     </div>
-    ${gameLine}
+    ${gameHtml}
+    ${rlHtml}
   </div>`;
 }
 
-// ── POD card ──────────────────────────────────────────────────
+// ── POD card ─────────────────────────────────────────────────────────
 function podCard(pod) {
   if (!pod) return '';
   const odds = pod.odds > 0 ? `+${pod.odds}` : `${pod.odds || '—'}`;
-  const result = pod.result === 'PENDING' ? '' :
+  const resultHtml = (!pod.result || pod.result === 'PENDING') ? '' :
     `<span class="pod-result ${pod.result === 'WIN' ? 'result-win' : pod.result === 'LOSS' ? 'result-loss' : 'result-push'}">${pod.result}</span>`;
+  const confHtml = pod.conf_sym ? `<span class="pod-conf">${pod.conf_sym}</span>` : '';
   return `
   <div class="pod-card">
     <div class="pod-label">📌 POD · ${pod.sport}</div>
     <div class="pod-pick">${pod.pick}</div>
-    <div class="pod-meta">${odds} · ${pod.units}u · Edge +${Number(pod.edge||0).toFixed(1)}%</div>
-    <div class="pod-game">${pod.game || ''} ${pod.game_time ? '<span class="pick-time">' + pod.game_time + '</span>' : ''}</div>
-    ${result}
+    <div class="pod-meta">${odds} · ${pod.units}u · Edge +${Number(pod.edge||0).toFixed(1)}% ${confHtml}</div>
+    <div class="pod-game">${pod.game || ''} ${pod.game_time ? `<span class="pick-time">${pod.game_time}</span>` : ''}</div>
+    ${resultHtml}
   </div>`;
 }
 
-// ── Flagged section ───────────────────────────────────────────
-function flaggedCard(pick) {
-  const edge = pick.edge_pct || pick.edge || 0;
-  const odds = pick.odds ? (pick.odds > 0 ? `+${pick.odds}` : `${pick.odds}`) : 'N/A';
-  const reason = pick.flag_reason || (edge > 15 ? 'Edge >15% — model artifact risk' : 'Edge <3% — below threshold');
-  return `
-  <div class="flagged-card">
-    <span class="flagged-tag">⚠️ FLAGGED</span>
-    <span class="flagged-sport">[${pick.sport}]</span>
-    <span class="flagged-side">${pick.side || pick.desc || '—'}</span>
-    <span class="flagged-odds">${odds}</span>
-    <span class="flagged-edge">Edge +${Number(edge).toFixed(1)}%</span>
-    <span class="flagged-reason"> — ${reason}</span>
-    ${pick.game ? `<div class="flagged-game">${pick.game} ${pick.game_time || ''}</div>` : ''}
-  </div>`;
-}
-
-// ── Tab filtering ─────────────────────────────────────────────
-const SPORT_MAP = {
-  'ALL':    null,
-  'NCAA':   'NCAA_BASEBALL',
-  'NHL':    'NHL',
-  'MLB':    'MLB',
-  'SOCCER': 'SOCCER',
+// ── Tab filtering ─────────────────────────────────────────────────────
+const SPORT_FILTER = {
+  'ALL':     null,
+  'NCAA':    'NCAA',
+  'NHL':     'NHL',
+  'MLB':     'MLB',
+  'SOCCER':  'SOCCER',
+  'PROPS':   'PROPS',      // future: player prop signals
+  'PICKEMS': 'PICKEM',     // future: pickem-style signals
 };
 
 let currentTab = 'ALL';
 let slipData   = null;
 
-function filterPicks(picks, sport) {
-  if (!sport) return picks;
-  return picks.filter(p => (p.sport || '').toUpperCase().includes(sport.replace('_BASEBALL','')));
+function filterPicks(picks, sportKey) {
+  if (!sportKey) return picks;
+  return picks.filter(p => (p.sport || '').toUpperCase().includes(sportKey));
 }
 
 function renderPicks() {
   if (!slipData) return;
-  const sportFilter = SPORT_MAP[currentTab];
-  const rec  = filterPicks(slipData.recommended || [], sportFilter);
-  const flag = filterPicks(slipData.flagged     || [], sportFilter);
-  const pods = sportFilter
-    ? (slipData.pod || []).filter(p => p.sport.toUpperCase().includes(sportFilter.replace('_BASEBALL','')))
-    : (slipData.pod || []);
+  const sportKey = SPORT_FILTER[currentTab];
+  const all  = slipData.recommended || [];
+  const rec  = filterPicks(all, sportKey);
+  const pods = filterPicks(slipData.pod || [], sportKey);
 
   // POD row
   const podEl = document.getElementById('pod-row');
-  if (podEl) podEl.innerHTML = pods.map(podCard).join('') || '<p class="empty-state">No POD picks yet</p>';
+  if (podEl) {
+    podEl.innerHTML = pods.length
+      ? pods.map(podCard).join('')
+      : '<p class="empty-state">No POD picks today — requires HIGH confidence + WHEELHOUSE or better</p>';
+  }
 
-  // Recommended
+  // Picks grid
   const recEl = document.getElementById('picks-grid');
-  if (recEl) recEl.innerHTML = rec.length
-    ? rec.map(pickCard).join('')
-    : '<p class="empty-state">No recommended picks for this filter</p>';
+  if (recEl) {
+    if (currentTab === 'PROPS') {
+      recEl.innerHTML = '<p class="empty-state coming-soon">📊 Player Props coming soon — NHL SOG, MLB K props, Soccer SOT</p>';
+    } else if (currentTab === 'PICKEMS') {
+      recEl.innerHTML = '<p class="empty-state coming-soon">🎯 Pickems coming soon — Best of the best, no-spread pick format</p>';
+    } else {
+      recEl.innerHTML = rec.length
+        ? rec.map(pickCard).join('')
+        : '<p class="empty-state">No picks for this sport today</p>';
+    }
+  }
 
-  // Count badge
+  // Count
   const countEl = document.getElementById('rec-count');
-  if (countEl) countEl.textContent = rec.length;
-
-  // Flagged
-  const flagEl = document.getElementById('flagged-list');
-  if (flagEl) flagEl.innerHTML = flag.map(flaggedCard).join('') || '<p class="empty-state">None</p>';
-
-  const flagCount = document.getElementById('flagged-count');
-  if (flagCount) flagCount.textContent = flag.length;
+  if (countEl) {
+    countEl.textContent = currentTab === 'PROPS' || currentTab === 'PICKEMS' ? '—' : rec.length;
+  }
 }
 
-// ── Tabs ──────────────────────────────────────────────────────
+// ── Tabs ──────────────────────────────────────────────────────────────
 document.querySelectorAll('.sport-tab').forEach(tab => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.sport-tab').forEach(t => t.classList.remove('active'));
@@ -292,27 +303,18 @@ document.querySelectorAll('.sport-tab').forEach(tab => {
   });
 });
 
-// ── Flagged toggle ────────────────────────────────────────────
-const flagToggle = document.getElementById('flagged-toggle');
-if (flagToggle) {
-  flagToggle.addEventListener('click', () => {
-    const section = document.getElementById('flagged-section');
-    section.classList.toggle('collapsed');
-    flagToggle.textContent = section.classList.contains('collapsed') ? '▼ Show' : '▲ Hide';
-  });
-}
-
-// ── Init ──────────────────────────────────────────────────────
+// ── Init ──────────────────────────────────────────────────────────────
 loadData().then(({ slip, record }) => {
   slipData = slip;
-
-  // Update date label
   const dateEl = document.getElementById('slip-date');
-  if (dateEl && slip.date) dateEl.textContent = slip.date;
-
+  if (dateEl && slip.date) {
+    const d = new Date(slip.date + 'T12:00:00');
+    dateEl.textContent = d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+  }
   updateRecordBar(record);
   renderPicks();
 });
 </script>
+
 </body>
 </html>

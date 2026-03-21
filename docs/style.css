@@ -812,3 +812,64 @@ footer {
 .flagged-edge   { color: #4a7a4a; }
 .flagged-reason { color: #444; font-style: italic; }
 .flagged-game   { width: 100%; color: #444; font-size: 11px; }
+
+/* ── Confidence badges ────────────────────────── */
+.conf-badge {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+  padding: 2px 6px; border-radius: 3px;
+  font-family: 'Barlow Condensed', sans-serif;
+}
+.conf-high { background: rgba(26,107,60,0.25); color: #3cb371; border: 1px solid rgba(60,179,113,0.4); }
+.conf-low  { background: rgba(80,80,80,0.2);   color: #888;    border: 1px solid #333; }
+
+/* ── POD badge in section title ────────────────── */
+.pod-badge {
+  font-size: 11px; background: rgba(184,150,12,0.2); color: var(--gold);
+  border: 1px solid rgba(184,150,12,0.4); border-radius: 3px;
+  padding: 2px 7px; font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+  vertical-align: middle;
+}
+
+/* ── POD highlight on pick card ─────────────────── */
+.pick-card.pod-highlight {
+  border-color: var(--gold) !important;
+  box-shadow: 0 0 12px rgba(184,150,12,0.25);
+}
+.pod-crown {
+  font-size: 10px; color: var(--gold); font-weight: 700;
+  font-family: 'Barlow Condensed', sans-serif;
+}
+
+/* ── Pick header right side (conf + units + pod) ── */
+.pick-header-right {
+  display: flex; align-items: center; gap: 6px;
+}
+
+/* ── Run line alternative note ──────────────────── */
+.pick-rl-alt {
+  margin-top: 6px; padding: 5px 8px;
+  background: rgba(74,144,217,0.1); border: 1px solid rgba(74,144,217,0.25);
+  border-radius: 4px; font-size: 11px; color: #6ab0e8;
+  font-family: 'Barlow', sans-serif;
+}
+
+/* ── Coming soon placeholder ────────────────────── */
+.empty-state.coming-soon {
+  color: #555; font-style: italic; font-size: 14px; padding: 40px 20px;
+  border: 1px dashed #333; border-radius: 8px; text-align: center;
+}
+
+/* ── Sport tab: PROPS / PICKEMS extra styling ────── */
+.sport-tab[data-sport="PROPS"],
+.sport-tab[data-sport="PICKEMS"] {
+  opacity: 0.7;
+}
+.sport-tab[data-sport="PROPS"].active,
+.sport-tab[data-sport="PICKEMS"].active {
+  opacity: 1;
+}
+
+/* ── Pod conf in pod card ────────────────────────── */
+.pod-conf {
+  font-size: 11px; color: #3cb371; letter-spacing: 0.5px;
+}

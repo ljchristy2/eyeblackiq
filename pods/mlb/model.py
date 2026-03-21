@@ -334,6 +334,9 @@ def run_model(date_str: str, dry_run: bool = False) -> int:
             logger.error(f"Target DB not found: {TGT_DB}")
             return 0
         conn = sqlite3.connect(TGT_DB)
+        # Idempotent — clear today's signals before rewriting
+        conn.execute("DELETE FROM signals WHERE signal_date=? AND sport=?", (date_str, SPORT))
+        conn.commit()
 
     # ------------------------------------------------------------------
     # K prop signals

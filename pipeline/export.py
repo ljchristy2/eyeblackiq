@@ -44,10 +44,31 @@ def get_conn():
     return sqlite3.connect(DB_PATH)
 
 
+def parse_conf_from_notes(notes: str) -> tuple:
+    """
+    Extract confidence level and symbol from the notes string.
+    Returns (label, symbol) e.g. ('HIGH', '●●●')
+    """
+    if not notes:
+        return ("MED", "●●○")
+    if "HIGH" in notes:
+        return ("HIGH", "●●●")
+    elif "LOW" in notes:
+        return ("LOW", "●○○")
+    return ("MED", "●●○")
+
+
+def parse_rl_alt(notes: str) -> bool:
+    """Returns True if signal has a run-line alternative flag in notes."""
+    return "RL_ALT" in (notes or "")
+
+
 def export_today_slip(date_str: str) -> dict:
     """
     Reads signals for date_str from DB, returns slip dict.
-    Splits into recommended and flagged sections.
+    Splits into recommended and flagged.
+    PODs sourced from signals.is_pod=1 (HIGH confidence + WHEELHOUSE+ tier).
+    Sorted: PODs first, then by units DESC, edge DESC.
     """
     with get_conn() as conn:
         conn.row_factory = sqlite3.Row
@@ -59,21 +80,14 @@ def export_today_slip(date_str: str) -> dict:
                       gate4_line_move, gate5_etl_fresh
                FROM signals
                WHERE signal_date = ?
-               ORDER BY sport, is_pod DESC, edge DESC""",
+               ORDER BY is_pod DESC, units DESC, edge DESC""",
             (date_str,)
         )
         rows = [dict(r) for r in cur.fetchall()]
 
-    # Also get POD records for today
-    with get_conn() as conn:
-        conn.row_factory = sqlite3.Row
-        cur = conn.execute(
-            "SELECT * FROM pod_records WHERE date = ?", (date_str,)
-        )
-        pods = [dict(r) for r in cur.fetchall()]
-
     recommended = []
     flagged     = []
+    pod_summary = []
 
     for row in rows:
         edge_val  = row.get("edge") or 0
@@ -81,28 +95,35 @@ def export_today_slip(date_str: str) -> dict:
         status    = edge_window(edge_val, units=units_val)
         row["edge_status"] = status
         row["edge_pct"]    = round(edge_val * 100, 2)
+
+        # Parse confidence and RL alt from notes
+        conf_label, conf_sym = parse_conf_from_notes(row.get("notes", ""))
+        row["conf_label"] = conf_label
+        row["conf_sym"]   = conf_sym
+        row["rl_alt"]     = parse_rl_alt(row.get("notes", ""))
+
         if status == "recommended":
             recommended.append(row)
+            # Build POD summary from is_pod=1 signals
+            if row.get("is_pod"):
+                pod_summary.append({
+                    "sport":      row["sport"],
+                    "pick":       row["side"],
+                    "odds":       row["odds"],
+                    "tier":       row["tier"],
+                    "units":      row["units"],
+                    "game":       row["game"],
+                    "game_time":  row["game_time"],
+                    "model_prob": row["model_prob"],
+                    "edge":       row["edge_pct"],
+                    "ev":         row["ev"],
+                    "conf_label": conf_label,
+                    "conf_sym":   conf_sym,
+                    "result":     "PENDING",
+                })
         else:
             row["flag_reason"] = "Below minimum tier threshold (0 units)"
             flagged.append(row)
-
-    # Build POD summary
-    pod_summary = []
-    for p in pods:
-        pod_summary.append({
-            "sport":      p["sport"],
-            "pick":       p["pick"],
-            "odds":       p["odds"],
-            "tier":       p["tier"],
-            "units":      p["units"],
-            "game":       p["game"],
-            "game_time":  p["game_time"],
-            "model_prob": p["model_prob"],
-            "edge":       round((p["edge"] or 0) * 100, 2),
-            "ev":         p["ev"],
-            "result":     p["result"],
-        })
 
     slip = {
         "date":        date_str,
