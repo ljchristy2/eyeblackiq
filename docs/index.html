@@ -79,6 +79,8 @@
     <button class="filter-btn" data-filter="sport" data-val="MLB">⚾ MLB</button>
     <button class="filter-btn" data-filter="sport" data-val="NHL">🏒 NHL</button>
     <button class="filter-btn" data-filter="sport" data-val="SOCCER">⚽ Soccer</button>
+    <button class="filter-btn" data-filter="sport" data-val="CRICKET">🏏 Cricket</button>
+    <button class="filter-btn" data-filter="sport" data-val="HANDBALL">🤾 Handball</button>
   </div>
   <div class="filter-divider"></div>
   <div class="filter-group">
@@ -223,14 +225,35 @@ function confBadge(label, sym) {
   return `<span class="conf-badge ${cls}">${sym || label}</span>`;
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-function isPickem(odds) {
-  if (odds == null) return false;
-  const o = Number(odds);
-  return o >= -120 && o <= 120;
+// ── Source classification ─────────────────────────────────────────────────────
+// pick_source === 'SPORTSBOOK' → traditional sportsbook line (ML, total, spread, player prop)
+// pick_source === 'PICKEM'     → pick'em platform (PrizePicks, Underdog, ESPN Pick'em, etc.)
+function isPickem(pick) {
+  return (pick.pick_source || 'SPORTSBOOK') === 'PICKEM';
 }
-function isProp(market) {
-  return (market || '').toUpperCase() === 'PROPS';
+function isProp(pick) {
+  return (pick.pick_source || 'SPORTSBOOK') === 'SPORTSBOOK';
+}
+
+// ── Visual flags (B2B / edge / EV signals) ───────────────────────────────────
+function visualFlags(pick) {
+  const flags = [];
+  const ev = typeof pick.ev !== 'undefined' ? pick.ev * 100 : null;
+  // B2B — opponent B2B favors OVER (defense fatigued); player B2B favors UNDER (may be limited)
+  if (pick.b2b_flag === 'OPPONENT_B2B') {
+    flags.push(`<span class="vflag vflag-b2b" title="Opponent on back-to-back — fatigue edge (OVER)">🔄 B2B OPP</span>`);
+  } else if (pick.b2b_flag === 'PLAYER_B2B') {
+    flags.push(`<span class="vflag vflag-b2b-under" title="Player on back-to-back — may be limited (UNDER)">😴 B2B PLR</span>`);
+  }
+  // Outside edge threshold — shown in FMV only, not recommended
+  if (pick.edge_status === 'flagged_high') {
+    flags.push(`<span class="vflag vflag-edge-high" title="Edge above cap — line may have moved, verify before betting">⚠️ EDGE HIGH</span>`);
+  }
+  // Low/negative EV
+  if (ev !== null && ev < 2) {
+    flags.push(`<span class="vflag vflag-ev-low" title="Low expected value — informational only">📉 LOW EV</span>`);
+  }
+  return flags.length ? `<div class="visual-flags">${flags.join('')}</div>` : '';
 }
 
 // ── Pick card ─────────────────────────────────────────────────────────────────
@@ -250,9 +273,10 @@ function pickCard(pick) {
     ? `<div class="pick-game">${pick.game}${pick.game_time ? `  <span class="pick-time">${pick.game_time}</span>` : ''}</div>`
     : '';
   const podTag    = isPod ? `<span class="pod-crown">📌 POD</span>` : '';
-  const propTag   = isProp(pick.market) ? `<span style="display:inline-block;font-size:9px;padding:1px 5px;background:#4A90D9;color:#000;font-weight:700;border-radius:2px;margin-left:4px;vertical-align:middle;">⚡ PROP</span>` : '';
-  const pickemTag = isPickem(pick.odds) ? `<span style="display:inline-block;font-size:9px;padding:1px 5px;background:#888;color:#fff;font-weight:700;border-radius:2px;margin-left:4px;vertical-align:middle;">PICK\'EM</span>` : '';
-  const sportIcon = {NCAA:'⚾',MLB:'⚾',NHL:'🏒',SOCCER:'⚽'}[(pick.sport||'').toUpperCase()] || '📊';
+  const propTag   = isProp(pick) ? '' : '';   // sportsbook tag removed — it's the default; only tag pick'ems
+  const pickemTag = isPickem(pick) ? `<span style="display:inline-block;font-size:9px;padding:1px 5px;background:#6A3DE8;color:#fff;font-weight:700;border-radius:2px;margin-left:4px;vertical-align:middle;">PICK\'EM</span>` : '';
+  const flagsHtml = visualFlags(pick);
+  const sportIcon = {NCAA:'⚾',MLB:'⚾',NHL:'🏒',SOCCER:'⚽',CRICKET:'🏏',HANDBALL:'🤾'}[(pick.sport||'').toUpperCase()] || '📊';
   return `
   <div class="pick-card ${tclass}${isPod ? ' pod-highlight' : ''}">
     <div class="pick-header">
@@ -263,13 +287,14 @@ function pickCard(pick) {
         ${podTag}
       </div>
     </div>
-    <div class="pick-side">${pick.side || pick.pick || '—'}${propTag}${pickemTag}</div>
+    <div class="pick-side">${pick.side || pick.pick || '—'}${pickemTag}</div>
     <div class="pick-meta">
       <span class="pick-odds">${oddsStr}</span>
       <span class="pick-edge">Edge ${sign}${Number(edge).toFixed(1)}%</span>
       ${pick.ev ? `<span class="pick-ev">EV ${pick.ev >= 0 ? '+' : ''}${(pick.ev * 100).toFixed(1)}%</span>` : ''}
     </div>
     ${gameHtml}
+    ${flagsHtml}
     ${rlHtml}
   </div>`;
 }
@@ -297,7 +322,7 @@ function radarCard(pick) {
   const edge  = typeof pick.edge_pct !== 'undefined' ? pick.edge_pct : (pick.edge || 0) * 100;
   const oddsRaw = pick.odds;
   const odds  = oddsRaw > 0 ? `+${oddsRaw}` : `${oddsRaw}`;
-  const sportIcon = {NCAA:'⚾',MLB:'⚾',NHL:'🏒',SOCCER:'⚽'}[(pick.sport||'').toUpperCase()] || '📊';
+  const sportIcon = {NCAA:'⚾',MLB:'⚾',NHL:'🏒',SOCCER:'⚽',CRICKET:'🏏',HANDBALL:'🤾'}[(pick.sport||'').toUpperCase()] || '📊';
   return `
   <div class="radar-card">
     <span class="radar-sport">${sportIcon} ${pick.sport}</span>
@@ -323,8 +348,8 @@ function matchesPodFilter(pick) {
 }
 function matchesTypeFilter(pick) {
   if (!filters.type) return true;
-  if (filters.type === 'PROPS')  return isProp(pick.market);
-  if (filters.type === 'PICKEM') return isPickem(pick.odds);
+  if (filters.type === 'PROPS')  return isProp(pick);
+  if (filters.type === 'PICKEM') return isPickem(pick);
   return true;
 }
 function passesFilter(pick) {
@@ -345,18 +370,21 @@ function renderPicks() {
       : '<p class="empty-state">No POD picks today — requires HIGH confidence + WHEELHOUSE or better</p>';
   }
 
-  // Picks grid — apply all filters. Exclude Scout (T3) from main grid if showing on radar.
-  const mainPicks = allRec.filter(p => passesFilter(p) && tierLevel(p.tier) !== 'T3');
-  const scoutPicks = allRec.filter(p => passesFilter(p) && tierLevel(p.tier) === 'T3');
+  // Picks grid — apply all filters.
+  // When Props or Pick'ems type filter is active, include T3/Scout in main grid so they're visible.
+  // Otherwise T3 picks go to the On Radar section.
+  const showAllTiers = (filters.type === 'PROPS' || filters.type === 'PICKEM');
+  const mainPicks  = allRec.filter(p => passesFilter(p) && (showAllTiers || tierLevel(p.tier) !== 'T3'));
+  const scoutPicks = allRec.filter(p => passesFilter(p) && !showAllTiers && tierLevel(p.tier) === 'T3');
 
   const recEl = document.getElementById('picks-grid');
   if (recEl) {
     if (mainPicks.length) {
       recEl.innerHTML = mainPicks.map(pickCard).join('');
     } else if (filters.type === 'PROPS') {
-      recEl.innerHTML = '<p class="empty-state">No player props today — props appear on MLB, NHL, and Soccer game days.</p>';
+      recEl.innerHTML = '<p class="empty-state">No sportsbook picks today matching current sport/tier filters. Sportsbook picks include ML, totals, spreads, and player props from traditional books (DraftKings, FanDuel, etc.).</p>';
     } else if (filters.type === 'PICKEM') {
-      recEl.innerHTML = '<p class="empty-state">No pick\'em plays today — pick\'ems are odds within ±120. Check back on days with more near-even-money lines.</p>';
+      recEl.innerHTML = '<p class="empty-state">No pick\'em plays today. Pick\'ems come from platforms like PrizePicks, Underdog, and ESPN Pick\'em — they\'ll appear here once a pick\'em scraper is live.</p>';
     } else {
       recEl.innerHTML = '<p class="empty-state">No plays meeting threshold for current filters.</p>';
     }

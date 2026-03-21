@@ -114,6 +114,9 @@
 .results-header { margin-bottom: 20px; }
 .results-title { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 2px; color: var(--text,#F0EDE8); line-height: 1; }
 .results-sub { font-size: 13px; color: var(--text-dim,#888); margin-top: 4px; }
+
+/* ── Pending pick row (ungraded — dimmed so they don't look like results) ── */
+tr[style*="opacity:0.5"] td { color: var(--text-dim,#888) !important; }
 </style>
 </head>
 <body>
@@ -199,6 +202,8 @@
       <button class="rf-btn" data-rf="sport" data-rv="MLB">⚾ MLB</button>
       <button class="rf-btn" data-rf="sport" data-rv="NHL">🏒 NHL</button>
       <button class="rf-btn" data-rf="sport" data-rv="SOCCER">⚽ Soccer</button>
+      <button class="rf-btn" data-rf="sport" data-rv="CRICKET">🏏 Cricket</button>
+      <button class="rf-btn" data-rf="sport" data-rv="HANDBALL">🤾 Handball</button>
       <span class="filter-label" style="margin-left:8px;">TYPE</span>
       <button class="rf-btn" data-rf="type" data-rv="PROPS">⚡ Props</button>
       <button class="rf-btn" data-rf="type" data-rv="PICKEM">Pick'ems</button>
@@ -271,6 +276,8 @@
       <button class="rf-btn" data-fmvsport="MLB" onclick="fmvSportFilter(this,'MLB')">MLB</button>
       <button class="rf-btn" data-fmvsport="NHL" onclick="fmvSportFilter(this,'NHL')">NHL</button>
       <button class="rf-btn" data-fmvsport="SOCCER" onclick="fmvSportFilter(this,'SOCCER')">Soccer</button>
+      <button class="rf-btn" data-fmvsport="CRICKET" onclick="fmvSportFilter(this,'CRICKET')">🏏 Cricket</button>
+      <button class="rf-btn" data-fmvsport="HANDBALL" onclick="fmvSportFilter(this,'HANDBALL')">🤾 Handball</button>
     </div>
     <div style="overflow-x:auto;">
       <table class="results-table">
@@ -372,14 +379,16 @@ function resultBadge(r) {
   return r;
 }
 
-function isPickem(odds) {
-  if (odds == null) return false;
-  const o = Number(odds);
-  return o >= -120 && o <= 120;
+// Source-based classification (matches index.html logic):
+// pick_source === 'SPORTSBOOK' → Props tab (ML, totals, spreads, player props from DK/FD/etc.)
+// pick_source === 'PICKEM'     → Pick'ems tab (PrizePicks, Underdog, ESPN Pick'em, etc.)
+function isPickem(pick) {
+  if (!pick || typeof pick === 'number' || typeof pick === 'string') return false;
+  return (pick.pick_source || 'SPORTSBOOK') === 'PICKEM';
 }
-
-function isProp(market) {
-  return (market || '').toUpperCase() === 'PROPS';
+function isProp(pick) {
+  if (!pick || typeof pick === 'number' || typeof pick === 'string') return false;
+  return (pick.pick_source || 'SPORTSBOOK') === 'SPORTSBOOK';
 }
 
 function oddsStr(odds) {
@@ -423,8 +432,8 @@ function buildLossAnalysis(p) {
 function renderDaily(picks) {
   const filtered = picks.filter(p => {
     if (rFilters.sport !== 'ALL' && !(p.sport || '').toUpperCase().includes(rFilters.sport)) return false;
-    if (rFilters.type === 'PROPS'  && !isProp(p.market)) return false;
-    if (rFilters.type === 'PICKEM' && !isPickem(p.odds)) return false;
+    if (rFilters.type === 'PROPS'  && !isProp(p)) return false;
+    if (rFilters.type === 'PICKEM' && !isPickem(p)) return false;
     if (rFilters.type === 'POD'    && !p.is_pod) return false;
     return true;
   });
@@ -435,19 +444,49 @@ function renderDaily(picks) {
     return;
   }
 
-  document.getElementById('daily-tbody').innerHTML = filtered.map((p, i) => {
+  // Sort picks newest-first, then group by date with visual separators
+  const sorted = [...filtered].sort((a, b) => {
+    const da = a.signal_date || '';
+    const db = b.signal_date || '';
+    return db.localeCompare(da);
+  });
+
+  let lastDate = null;
+  const rows = [];
+  sorted.forEach((p, i) => {
+    const dateKey = p.signal_date || '—';
+    // Insert date group header row whenever date changes
+    if (dateKey !== lastDate) {
+      lastDate = dateKey;
+      let dateLabel = dateKey;
+      if (dateKey !== '—') {
+        try {
+          const d = new Date(dateKey + 'T12:00:00');
+          dateLabel = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+        } catch(e) {}
+      }
+      rows.push(`<tr>
+        <td colspan="9" style="background:rgba(184,150,12,0.08);border-top:1px solid rgba(184,150,12,0.3);border-bottom:1px solid rgba(184,150,12,0.15);padding:6px 12px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold,#B8960C);">
+          📅 ${dateLabel}
+        </td>
+      </tr>`);
+    }
+
     const isLoss    = (p.result || '').toUpperCase().startsWith('L');
+    const isPending = (p.result || '').toUpperCase() === 'PENDING';
     const tier      = p.tier || '—';
     const tcolor    = p.tier_color || '#555555';
-    const propBadge = isProp(p.market) ? '<span class="prop-badge">⚡ PROP</span>' : '';
-    const pickemBadge = isPickem(p.odds) ? '<span class="pickem-badge">PICK\'EM</span>' : '';
+    const propBadge   = isProp(p)   ? '<span class="prop-badge">⚡ PROP</span>' : '';
+    const pickemBadge = isPickem(p) ? '<span class="pickem-badge">PICK\'EM</span>' : '';
     const podBadge  = p.is_pod ? '<span class="pod-indicator">📌 POD</span>' : '';
     const resCell   = isLoss
       ? `<span class="result-l">✗ L</span> <span class="loss-toggle" id="la-btn-${i}" onclick="toggleLossAnalysis(${i})">▼ Analysis</span>`
       : resultBadge(p.result);
+    // Dim pending picks (today's ungraded results should not look like graded results)
+    const rowStyle = isPending ? 'opacity:0.5;' : '';
     const main = `
-    <tr>
-      <td style="color:var(--text-dim);font-size:12px;white-space:nowrap;">${p.signal_date || '—'}</td>
+    <tr style="${rowStyle}">
+      <td style="color:var(--text-dim);font-size:12px;white-space:nowrap;">${dateKey}</td>
       <td style="color:var(--text-dim);font-size:12px;">${p.sport || '—'}</td>
       <td><span class="tier-pill" style="background:${tcolor};">${tier}</span></td>
       <td style="font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1px;">
@@ -466,8 +505,10 @@ function renderDaily(picks) {
         ${buildLossAnalysis(p)}
       </td>
     </tr>` : '';
-    return main + analysis;
-  }).join('');
+    rows.push(main + analysis);
+  });
+
+  document.getElementById('daily-tbody').innerHTML = rows.join('');
 }
 
 // ── Render Running Record ─────────────────────────────────────────────────────
@@ -513,8 +554,8 @@ function renderPOD(pods) {
 
 // ── Render POD sport badges ───────────────────────────────────────────────────
 function renderPodBadges(pods) {
-  const sports = ['NCAA_BASEBALL', 'MLB', 'NHL', 'SOCCER'];
-  const sportLabels = { NCAA_BASEBALL: 'NCAA', MLB: 'MLB', NHL: 'NHL', SOCCER: 'Soccer' };
+  const sports = ['NCAA_BASEBALL', 'MLB', 'NHL', 'SOCCER', 'CRICKET', 'HANDBALL'];
+  const sportLabels = { NCAA_BASEBALL: 'NCAA', MLB: 'MLB', NHL: 'NHL', SOCCER: 'Soccer', CRICKET: '🏏 Cricket', HANDBALL: '🤾 Handball' };
   const badges = sports.map(s => {
     const sp = pods.filter(p => (p.sport || '').toUpperCase() === s);
     const w  = sp.filter(p => p.result === 'WIN').length;

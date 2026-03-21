@@ -318,3 +318,15 @@ footer { background: var(--surface); border-top: 1px solid var(--border); paddin
   .filter-bar { padding: 8px 12px; }
   .method-grid { grid-template-columns: 1fr; }
 }
+
+/* ─── VISUAL FLAGS (B2B / EDGE / EV INDICATORS) ────────────────────────── */
+.visual-flags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.vflag {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 9px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+  padding: 2px 6px; border-radius: 3px; white-space: nowrap;
+}
+.vflag-b2b       { background: #1a3a2a; color: #4eca8b; border: 1px solid #2d5c40; } /* B2B OPP — green (over edge) */
+.vflag-b2b-under { background: #1a2a3a; color: #6ab0e0; border: 1px solid #2a4060; } /* B2B PLR — blue (under edge) */
+.vflag-edge-high { background: #2a1a00; color: #f0a030; border: 1px solid #5a3a00; } /* ⚠️ edge above cap */
+.vflag-ev-low    { background: #1a1a1a; color: #666;    border: 1px solid #333;    } /* 📉 low EV */

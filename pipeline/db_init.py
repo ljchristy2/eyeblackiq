@@ -40,6 +40,8 @@ CREATE TABLE IF NOT EXISTS signals (
     gate4_line_move  TEXT    DEFAULT 'PASS',
     gate5_etl_fresh  TEXT    DEFAULT 'PASS',
     notes            TEXT,
+    pick_source      TEXT    DEFAULT 'SPORTSBOOK', -- SPORTSBOOK | PICKEM
+    b2b_flag         TEXT,                          -- OPPONENT_B2B | PLAYER_B2B | NULL
     created_at       TEXT    NOT NULL
 );
 
@@ -147,6 +149,182 @@ CREATE TABLE IF NOT EXISTS etl_log (
     as_of_ts         TEXT,              -- data-as-of timestamp
     run_ts           TEXT    NOT NULL   -- when the ETL ran
 );
+
+-- ─────────────────────────────────────────────
+--  HANDBALL TABLES
+-- ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS handball_matches (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    game_id          TEXT UNIQUE,
+    date             TEXT NOT NULL,
+    league_id        INTEGER,
+    league_name      TEXT,
+    season           TEXT,
+    home_team        TEXT NOT NULL,
+    away_team        TEXT NOT NULL,
+    home_score       INTEGER,
+    away_score       INTEGER,
+    total_goals      INTEGER,
+    home_possession  REAL,
+    away_possession  REAL,
+    home_shots       INTEGER,
+    away_shots       INTEGER,
+    home_shots_on_goal INTEGER,
+    away_shots_on_goal INTEGER,
+    home_odds        REAL,
+    away_odds        REAL,
+    draw_odds        REAL,
+    total_line       REAL,
+    over_odds        REAL,
+    under_odds       REAL,
+    game_time        TEXT,
+    status           TEXT DEFAULT 'FT',
+    source           TEXT DEFAULT 'API_SPORTS',
+    created_at       TEXT DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS handball_team_stats (
+    id                          INTEGER PRIMARY KEY AUTOINCREMENT,
+    season                      TEXT NOT NULL,
+    league_id                   INTEGER,
+    team_name                   TEXT NOT NULL,
+    games_played                INTEGER DEFAULT 0,
+    wins                        INTEGER DEFAULT 0,
+    losses                      INTEGER DEFAULT 0,
+    draws                       INTEGER DEFAULT 0,
+    goals_for                   REAL DEFAULT 0,
+    goals_against               REAL DEFAULT 0,
+    possessions_per_game        REAL DEFAULT 52.0,
+    shots_per_game              REAL DEFAULT 30.0,
+    shot_efficiency             REAL DEFAULT 0.568,
+    def_goals_allowed_per_shot  REAL DEFAULT 0.568,
+    elo_rating                  REAL DEFAULT 1500,
+    last_updated                TEXT,
+    UNIQUE(season, league_id, team_name)
+);
+
+CREATE TABLE IF NOT EXISTS handball_odds (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    game_id          TEXT,
+    bookmaker        TEXT,
+    market           TEXT,
+    home_odds        REAL,
+    draw_odds        REAL,
+    away_odds        REAL,
+    total_line       REAL,
+    over_odds        REAL,
+    under_odds       REAL,
+    recorded_at      TEXT,
+    source           TEXT DEFAULT 'API_SPORTS',
+    UNIQUE(game_id, bookmaker, market)
+);
+
+-- ─────────────────────────────────────────────
+--  CRICKET TABLES
+-- ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS cricket_matches (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    fixture_id       TEXT UNIQUE,
+    date             TEXT NOT NULL,
+    league_id        INTEGER,
+    league_name      TEXT,
+    format           TEXT NOT NULL DEFAULT 'T20',
+    season           TEXT,
+    home_team        TEXT NOT NULL,
+    away_team        TEXT NOT NULL,
+    home_score       INTEGER,
+    away_score       INTEGER,
+    venue            TEXT,
+    toss_winner      TEXT,
+    toss_decision    TEXT,
+    result           TEXT,
+    winner           TEXT,
+    margin_runs      INTEGER,
+    margin_wickets   INTEGER,
+    home_odds        REAL,
+    away_odds        REAL,
+    total_line       REAL,
+    over_odds        REAL,
+    under_odds       REAL,
+    game_time        TEXT,
+    status           TEXT DEFAULT 'FT',
+    source           TEXT DEFAULT 'CRICSHEET',
+    created_at       TEXT DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS cricket_innings (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    fixture_id       TEXT,
+    innings_number   INTEGER,
+    batting_team     TEXT,
+    bowling_team     TEXT,
+    runs             INTEGER,
+    wickets          INTEGER,
+    overs            REAL,
+    extras           INTEGER,
+    run_rate         REAL,
+    source           TEXT DEFAULT 'CRICSHEET'
+);
+
+CREATE TABLE IF NOT EXISTS cricket_team_stats (
+    id                          INTEGER PRIMARY KEY AUTOINCREMENT,
+    season                      TEXT NOT NULL,
+    league_id                   INTEGER DEFAULT 0,
+    format                      TEXT NOT NULL DEFAULT 'T20',
+    team_name                   TEXT NOT NULL,
+    games_played                INTEGER DEFAULT 0,
+    wins                        INTEGER DEFAULT 0,
+    losses                      INTEGER DEFAULT 0,
+    avg_score_batting_first     REAL DEFAULT 165.0,
+    avg_score_batting_second    REAL DEFAULT 155.0,
+    avg_runs_conceded           REAL DEFAULT 165.0,
+    win_pct_batting_first       REAL DEFAULT 0.5,
+    win_pct_batting_second      REAL DEFAULT 0.5,
+    toss_win_pct                REAL DEFAULT 0.5,
+    elo_rating                  REAL DEFAULT 1500,
+    last_updated                TEXT,
+    UNIQUE(season, league_id, format, team_name)
+);
+
+CREATE TABLE IF NOT EXISTS cricket_venue_stats (
+    id                      INTEGER PRIMARY KEY AUTOINCREMENT,
+    venue                   TEXT UNIQUE,
+    format                  TEXT DEFAULT 'T20',
+    avg_first_innings_score REAL DEFAULT 165.0,
+    std_first_innings_score REAL DEFAULT 22.0,
+    avg_total_runs          REAL DEFAULT 330.0,
+    matches_played          INTEGER DEFAULT 0,
+    pace_friendly           REAL DEFAULT 0.5,
+    boundary_percentage     REAL DEFAULT 0.0,
+    last_updated            TEXT
+);
+
+CREATE TABLE IF NOT EXISTS cricket_players (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    player_name      TEXT NOT NULL,
+    team             TEXT,
+    season           TEXT,
+    format           TEXT DEFAULT 'T20',
+    matches          INTEGER DEFAULT 0,
+    innings          INTEGER DEFAULT 0,
+    runs_total       INTEGER DEFAULT 0,
+    avg_runs         REAL DEFAULT 0,
+    strike_rate      REAL DEFAULT 0,
+    batting_position INTEGER DEFAULT 5,
+    balls_faced_avg  REAL DEFAULT 15,
+    wicket_rate      REAL DEFAULT 0.045,
+    last_updated     TEXT,
+    UNIQUE(player_name, team, season, format)
+);
+
+-- Indexes for performance
+CREATE INDEX IF NOT EXISTS idx_hm_date    ON handball_matches(date);
+CREATE INDEX IF NOT EXISTS idx_hm_teams   ON handball_matches(home_team, away_team);
+CREATE INDEX IF NOT EXISTS idx_hts_team   ON handball_team_stats(team_name, season);
+CREATE INDEX IF NOT EXISTS idx_cm_date    ON cricket_matches(date, format);
+CREATE INDEX IF NOT EXISTS idx_cm_teams   ON cricket_matches(home_team, away_team);
+CREATE INDEX IF NOT EXISTS idx_cts_team   ON cricket_team_stats(team_name, format, season);
+CREATE INDEX IF NOT EXISTS idx_cvs_venue  ON cricket_venue_stats(venue);
 """
 
 def init_db():

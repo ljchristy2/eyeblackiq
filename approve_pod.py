@@ -1,14 +1,18 @@
 """
 EyeBlackIQ — approve_pod.py
-Flip PENDING_APPROVAL -> APPROVED in docs/data/today_slip.json.
-Logs all approvals to /results/pod_approvals.json.
-Optionally rebuilds the website and pushes to GitHub Pages.
+Approve a POD pick: flips PENDING_APPROVAL -> APPROVED, rebuilds site JSON,
+and optionally pushes to GitHub Pages.
 
-Usage:
-  python approve_pod.py --list              # Show pending PODs
-  python approve_pod.py --sport NCAA        # Approve NCAA POD
-  python approve_pod.py --sport MLB --push  # Approve + rebuild + git push
-  python approve_pod.py --sport NHL --rebuild  # Approve + rebuild (no push)
+POD picks are ALWAYS included on the bet slip once the model generates them
+(is_pod=1 in signals). Approval here is the human sign-off that also triggers
+the site rebuild so the public page reflects the approved POD.
+
+Usage (streamlined):
+  python approve_pod.py --list             # Show pending PODs for today
+  python approve_pod.py --sport NCAA       # Approve NCAA POD + auto-rebuild
+  python approve_pod.py --sport MLB --push # Approve + rebuild + git push
+  python approve_pod.py --all --push       # Approve all pending PODs + push
+  python approve_pod.py --no-rebuild       # Approve only, skip rebuild (rare)
 """
 import json
 import argparse
@@ -127,31 +131,49 @@ def git_push(commit_msg: str) -> bool:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Approve EyeBlackIQ POD pick")
-    parser.add_argument("--date",    default=datetime.now().strftime("%Y-%m-%d"))
-    parser.add_argument("--sport",   default=None, help="NCAA | MLB | NHL | SOCCER")
-    parser.add_argument("--list",    action="store_true", help="List pending PODs")
-    parser.add_argument("--rebuild", action="store_true", help="Rebuild site data after approval")
-    parser.add_argument("--push",    action="store_true", help="Rebuild + git push after approval")
+    parser.add_argument("--date",       default=datetime.now().strftime("%Y-%m-%d"))
+    parser.add_argument("--sport",      default=None, help="NCAA | MLB | NHL | SOCCER | etc.")
+    parser.add_argument("--all",        action="store_true", help="Approve ALL pending PODs for --date")
+    parser.add_argument("--list",       action="store_true", help="List pending PODs")
+    parser.add_argument("--push",       action="store_true", help="Rebuild + git push after approval")
+    parser.add_argument("--no-rebuild", action="store_true", help="Skip rebuild (approval only, rare)")
     args = parser.parse_args()
 
     slip = _load_json(SLIP_PATH)
-    if args.list or not args.sport:
+
+    if args.list or (not args.sport and not args.all):
         pending = list_pending_pods(slip)
         if not pending:
             print("No pending PODs found.")
         else:
-            print(f"Pending PODs ({len(pending)}):")
+            print(f"\nPending PODs ({len(pending)}):")
             for p in pending:
-                print(f"  [{p.get('sport','?')}]  {p.get('pick','?')}  {p.get('odds','?')}  {p.get('units','?')}u  EV={p.get('edge','?')}%")
-    else:
-        ok = approve_pod(args.date, args.sport)
+                print(f"  [{p.get('sport','?')}]  {p.get('pick','?')}  "
+                      f"{p.get('odds','?')}  {p.get('units','?')}u  Edge={p.get('edge','?')}%")
+        sys.exit(0)
+
+    sports_to_approve = []
+    if args.all:
+        sports_to_approve = [p.get("sport") for p in list_pending_pods(slip)]
+        if not sports_to_approve:
+            print("No pending PODs to approve.")
+            sys.exit(0)
+    elif args.sport:
+        sports_to_approve = [args.sport]
+
+    approved_any = False
+    for sport in sports_to_approve:
+        ok = approve_pod(args.date, sport)
         if ok:
-            print("APPROVED")
-            if args.push or args.rebuild:
-                rebuilt = rebuild_site(args.date)
-                print("Site rebuilt" if rebuilt else "Rebuild FAILED — check logs")
-                if args.push and rebuilt:
-                    pushed = git_push(f"chore: approve {args.sport.upper()} POD {args.date}")
-                    print("Pushed to GitHub Pages" if pushed else "Push FAILED — push manually")
+            print(f"APPROVED: {sport.upper()} POD")
+            approved_any = True
         else:
-            print("FAILED — check logs")
+            print(f"FAILED: {sport.upper()} — check logs")
+
+    # Auto-rebuild after approval (skip only if --no-rebuild passed)
+    if approved_any and not args.no_rebuild:
+        rebuilt = rebuild_site(args.date)
+        print("Site rebuilt." if rebuilt else "Rebuild FAILED — check logs")
+        if args.push and rebuilt:
+            pushed = git_push(f"approve: {'+'.join(sports_to_approve)} POD {args.date}")
+            print("Pushed to GitHub Pages." if pushed else "Push FAILED — push manually")

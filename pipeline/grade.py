@@ -13,7 +13,8 @@ import sqlite3
 import argparse
 import logging
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
+from zoneinfo import ZoneInfo
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -55,8 +56,30 @@ def get_pending(date_str: str = None) -> list:
         return [dict(r) for r in cur.fetchall()]
 
 
+def _game_is_complete(signal_date: str, game_time: str) -> bool:
+    """
+    Returns True if the game is plausibly complete (>= 3 hours past scheduled start).
+    game_time format: "3:00 PM ET" | "7:30 PM ET" | "PL GW31" (soccer matchweek = no time check)
+    signal_date format: "YYYY-MM-DD"
+    """
+    if not game_time or "PM" not in game_time and "AM" not in game_time:
+        return True  # no parseable time (e.g. soccer matchweek label) — skip guard
+    try:
+        et = ZoneInfo("America/New_York")
+        # Parse "10:00 PM ET" → datetime on signal_date
+        time_part = game_time.replace(" ET", "").replace(" ET", "").strip()
+        game_dt = datetime.strptime(f"{signal_date} {time_part}", "%Y-%m-%d %I:%M %p")
+        game_dt = game_dt.replace(tzinfo=et)
+        # Require at least 3 hours past start before grading
+        cutoff = game_dt + timedelta(hours=3)
+        return datetime.now(tz=et) >= cutoff
+    except Exception:
+        return True  # can't parse → don't block
+
+
 def grade_signal(signal_id: int, result: str, actual_val: str = None,
-                 closing_line: int = None, clv: float = None, notes: str = None):
+                 closing_line: int = None, clv: float = None, notes: str = None,
+                 force: bool = False):
     """
     Grade a single signal.
 
@@ -67,6 +90,7 @@ def grade_signal(signal_id: int, result: str, actual_val: str = None,
         closing_line: Pinnacle no-vig closing ML
         clv:          Closing line value (positive = beat close)
         notes:        Optional note
+        force:        Skip the game-time freshness guard (use only when you're certain)
     """
     result = result.upper()
     assert result in ("WIN", "LOSS", "PUSH", "VOID"), f"Invalid result: {result}"
@@ -76,14 +100,28 @@ def grade_signal(signal_id: int, result: str, actual_val: str = None,
     # Fetch signal
     with get_conn() as conn:
         cur = conn.execute(
-            "SELECT signal_date, sport, game, side, market, odds, units FROM signals WHERE id=?",
+            "SELECT signal_date, sport, game, side, market, odds, units, game_time FROM signals WHERE id=?",
             (signal_id,)
         )
         row = cur.fetchone()
         if not row:
             logger.error(f"Signal {signal_id} not found")
             return False
-        signal_date, sport, game, side, market, odds, units = row
+        signal_date, sport, game, side, market, odds, units, game_time = row
+
+        # ── Game-time guard: refuse to grade a game before it could have finished ──
+        if not force and not _game_is_complete(signal_date, game_time):
+            logger.error(
+                f"BLOCKED: Signal {signal_id} ({side} — {game_time}) cannot be graded yet — "
+                f"game hasn't finished. Use --force if you're certain the result is final."
+            )
+            return False
+
+        # Check for duplicate grade
+        cur = conn.execute("SELECT id FROM results WHERE signal_id=?", (signal_id,))
+        if cur.fetchone():
+            logger.warning(f"Signal {signal_id} already graded — skipping. Delete the result row first if regrading.")
+            return False
 
         # Auto-compute units_net
         units_net = None
@@ -126,11 +164,12 @@ def grade_signal(signal_id: int, result: str, actual_val: str = None,
     return True
 
 
-def grade_batch(date_str: str, grades: dict):
+def grade_batch(date_str: str, grades: dict, force: bool = False):
     """
     Grade multiple signals at once.
 
     grades: {signal_id: {"result": "WIN", "actual_val": "4 Ks"}}
+    force:  Skip game-time guard for all entries (use only when certain games are final)
     """
     success = 0
     for sid, data in grades.items():
@@ -141,6 +180,7 @@ def grade_batch(date_str: str, grades: dict):
             data.get("closing_line"),
             data.get("clv"),
             data.get("notes"),
+            force=data.get("force", force),
         )
         if ok:
             success += 1
@@ -201,19 +241,21 @@ def interactive_grade(date_str: str = None):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Grade EyeBlackIQ signals")
-    parser.add_argument("--date",      default=None, help="Date YYYY-MM-DD")
-    parser.add_argument("--signal-id", type=int,     default=None)
-    parser.add_argument("--result",    default=None, help="WIN|LOSS|PUSH|VOID")
-    parser.add_argument("--actual",    default=None, help="Actual value string")
-    parser.add_argument("--closing",   type=int,     default=None, help="Pinnacle closing ML")
-    parser.add_argument("--clv",       type=float,   default=None)
+    parser.add_argument("--date",        default=None, help="Date YYYY-MM-DD")
+    parser.add_argument("--signal-id",   type=int,     default=None)
+    parser.add_argument("--result",      default=None, help="WIN|LOSS|PUSH|VOID")
+    parser.add_argument("--actual",      default=None, help="Actual value string")
+    parser.add_argument("--closing",     type=int,     default=None, help="Pinnacle closing ML")
+    parser.add_argument("--clv",         type=float,   default=None)
     parser.add_argument("--interactive", action="store_true")
+    parser.add_argument("--force",       action="store_true",
+                        help="Skip game-time guard — only use when game is confirmed final")
     args = parser.parse_args()
 
     if args.interactive:
         interactive_grade(args.date)
     elif args.signal_id and args.result:
-        grade_signal(args.signal_id, args.result, args.actual, args.closing, args.clv)
+        grade_signal(args.signal_id, args.result, args.actual, args.closing, args.clv, force=args.force)
     else:
         pending = get_pending(args.date)
         print(f"Pending signals{f' for {args.date}' if args.date else ''}: {len(pending)}")

@@ -27,14 +27,14 @@ BASE_DIR  = Path(__file__).parent.parent
 DB_PATH   = BASE_DIR / "pipeline" / "db" / "eyeblackiq.db"
 DOCS_DATA = BASE_DIR / "docs" / "data"
 
-# Edge window — active
-# MIN_EDGE = 0.03   (< 3% → models set units=0, caught below as flagged_low)
-# MAX_EDGE_TEAM  = 0.15  (> 15% on ML/total → likely stale line or model artifact)
-# MAX_EDGE_PROP  = 0.20  (> 20% on props → props market is thinner, higher edges are real)
+# Edge window — active (v2: wider caps per performance data)
+# MIN_EDGE       = 0.03   (< 3%  → models set units=0, caught below as flagged_low)
+# MAX_EDGE_TEAM  = 0.20   (> 20% on ML/total → likely stale line or model artifact)
+# MAX_EDGE_PROP  = 0.30   (> 30% on props → props market is thin, higher real edges exist)
 # PODs bypass the cap — human-reviewed, highest conviction, always on the slip.
-MIN_EDGE     = 0.03
-MAX_EDGE_TEAM = 0.15
-MAX_EDGE_PROP = 0.20
+MIN_EDGE      = 0.03
+MAX_EDGE_TEAM = 0.20
+MAX_EDGE_PROP = 0.30
 
 
 def edge_window(edge, units=None, bet_type=None, is_pod=False):
@@ -91,7 +91,9 @@ def export_today_slip(date_str: str) -> dict:
                       odds, model_prob, no_vig_prob, edge, ev, tier, units,
                       is_pod, pod_sport, notes,
                       gate1_pyth, gate2_edge, gate3_model_agree,
-                      gate4_line_move, gate5_etl_fresh
+                      gate4_line_move, gate5_etl_fresh,
+                      COALESCE(pick_source, 'SPORTSBOOK') as pick_source,
+                      b2b_flag
                FROM signals
                WHERE signal_date = ?
                ORDER BY is_pod DESC, units DESC, edge DESC""",
@@ -190,14 +192,15 @@ def export_record() -> dict:
         roi       = round((net_units / n * 100) if n > 0 else 0, 2)
         clv_pct   = round((clv_pos / clv_n * 100) if clv_n > 0 else 0, 1)
 
-    # POD record
+    # POD record — read from results+signals join (pod_records table is for pod_approval flow)
     with get_conn() as conn:
         cur = conn.execute(
             """SELECT
-                   SUM(CASE WHEN result='WIN'  THEN 1 ELSE 0 END),
-                   SUM(CASE WHEN result='LOSS' THEN 1 ELSE 0 END)
-               FROM pod_records
-               WHERE result IN ('WIN','LOSS')"""
+                   SUM(CASE WHEN r.result='WIN'  THEN 1 ELSE 0 END),
+                   SUM(CASE WHEN r.result='LOSS' THEN 1 ELSE 0 END)
+               FROM results r
+               JOIN signals s ON s.id = r.signal_id
+               WHERE s.is_pod = 1 AND r.result IN ('WIN','LOSS')"""
         )
         pr = cur.fetchone()
     pod_wins   = pr[0] or 0
@@ -398,7 +401,9 @@ def export_full_market_view(limit: int = 500) -> list:
         cur = conn.execute(
             """SELECT r.signal_date as date, r.sport, r.side as pick, r.market,
                       r.odds as line, r.units, r.result as status, r.units_net,
-                      r.actual_val, s.tier, s.ev, s.edge, s.notes, s.is_pod
+                      r.actual_val, s.tier, s.ev, s.edge, s.notes, s.is_pod,
+                      COALESCE(s.pick_source, 'SPORTSBOOK') as pick_source,
+                      s.b2b_flag
                FROM results r
                LEFT JOIN signals s ON s.id = r.signal_id
                WHERE r.result IN ('WIN','LOSS','PUSH','VOID')
@@ -427,23 +432,26 @@ def export_full_market_view(limit: int = 500) -> list:
 
 
 def export_pod_picks(limit: int = 100) -> list:
-    """Returns all graded POD picks."""
+    """Returns all graded POD picks (WIN/LOSS/PUSH) plus any still PENDING."""
     with get_conn() as conn:
         conn.row_factory = sqlite3.Row
         cur = conn.execute(
             """SELECT r.signal_date as date, r.sport, r.side as pick,
                       r.odds as line, r.units, r.result, r.units_net as net_units,
-                      r.actual_val, s.tier, s.ev
+                      r.actual_val, s.tier, s.ev, s.edge, s.game, s.game_time
                FROM results r
-               LEFT JOIN signals s ON s.id = r.signal_id
-               WHERE s.is_pod = 1 AND r.result IN ('WIN','LOSS','PUSH','VOID')
+               JOIN signals s ON s.id = r.signal_id
+               WHERE s.is_pod = 1
                ORDER BY r.signal_date DESC
                LIMIT ?""",
             (limit,)
         )
         rows = [dict(r) for r in cur.fetchall()]
     for r in rows:
-        r["tier"] = clean_tier(r.get("tier") or "")
+        r["tier"]     = clean_tier(r.get("tier") or "")
+        r["edge_pct"] = round((r.pop("edge") or 0) * 100, 2)
+        ev = r.pop("ev") or 0
+        r["ev_pct"]   = round(ev * 100, 2)
     return rows
 
 
