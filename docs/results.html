@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Results — EyeBlackIQ</title>
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo-block">
+      <span class="logo-eb">EB</span>
+      <div class="logo-text">
+        <span class="logo-name">EyeBlackIQ</span>
+        <span class="logo-tag">NCAA Baseball Prediction Model</span>
+      </div>
+    </div>
+    <nav>
+      <a href="index.html" class="nav-link">Today</a>
+      <a href="results.html" class="nav-link active">Results</a>
+      <a href="methodology.html" class="nav-link">Methodology</a>
+    </nav>
+    <div class="social-links">
+      <a href="https://twitter.com/EyeBlackIQ" target="_blank" class="social-btn">𝕏 Follow</a>
+      <a href="#" target="_blank" class="social-btn telegram">Telegram</a>
+    </div>
+  </div>
+</header>
+
+<div class="record-bar">
+  <div class="record-inner">
+    <div class="record-stat">
+      <span class="stat-label">SEASON</span>
+      <span class="stat-value" id="bar-record">0-0-0</span>
+    </div>
+    <div class="record-divider"></div>
+    <div class="record-stat">
+      <span class="stat-label">NET UNITS</span>
+      <span class="stat-value" id="bar-units">+0.0u</span>
+    </div>
+    <div class="record-divider"></div>
+    <div class="record-stat">
+      <span class="stat-label">ROI</span>
+      <span class="stat-value" id="bar-roi">0.0%</span>
+    </div>
+    <div class="record-divider"></div>
+    <div class="record-stat">
+      <span class="stat-label">POD RECORD</span>
+      <span class="stat-value" id="bar-pod">0-0</span>
+    </div>
+    <div class="record-divider"></div>
+    <div class="record-stat">
+      <span class="stat-label">STREAK</span>
+      <span class="stat-value" id="bar-streak">—</span>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div class="results-header">
+    <div class="results-title">Results</div>
+    <div class="results-sub">Full transparent record — every pick, every line, every result</div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('daily')">Daily Results</button>
+    <button class="tab-btn" onclick="switchTab('running')">Running Record</button>
+    <button class="tab-btn" onclick="switchTab('pod')">POD Record</button>
+  </div>
+
+  <!-- TAB 1: DAILY RESULTS -->
+  <div class="tab-content active" id="tab-daily">
+    <div style="overflow-x:auto;">
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Tier</th>
+            <th>Pick</th>
+            <th>Teams</th>
+            <th>Line</th>
+            <th>Units</th>
+            <th>Result</th>
+            <th>Score</th>
+            <th>Net</th>
+          </tr>
+        </thead>
+        <tbody id="daily-tbody">
+          <tr><td colspan="9" style="color:var(--text-dim);text-align:center;padding:32px;">Loading results...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB 2: RUNNING RECORD -->
+  <div class="tab-content" id="tab-running">
+    <div style="overflow-x:auto;">
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Day W-L-P</th>
+            <th>Day Net</th>
+            <th>Season W-L-P</th>
+            <th>Season Net</th>
+            <th>ROI %</th>
+            <th>Streak</th>
+          </tr>
+        </thead>
+        <tbody id="running-tbody">
+          <tr><td colspan="7" style="color:var(--text-dim);text-align:center;padding:32px;">Loading record...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB 3: POD RECORD -->
+  <div class="tab-content" id="tab-pod">
+    <div class="pod-label" style="margin-bottom:20px;">⭐ Pick Of The Day — Tracked Separately</div>
+    <div style="overflow-x:auto;">
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Pick</th>
+            <th>Teams</th>
+            <th>Line</th>
+            <th>Units</th>
+            <th>Result</th>
+            <th>Score</th>
+            <th>Net</th>
+          </tr>
+        </thead>
+        <tbody id="pod-tbody">
+          <tr><td colspan="8" style="color:var(--text-dim);text-align:center;padding:32px;">Loading POD record...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    All lines recorded at time of posting. Results verified against official scores.<br>
+    EyeBlackIQ is for entertainment purposes only. Bet responsibly.
+  </div>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span class="footer-logo">EyeBlackIQ</span>
+      <span class="footer-tag">The model sees what the market misses.</span>
+    </div>
+    <div class="footer-links">
+      <a href="https://twitter.com/EyeBlackIQ" target="_blank">𝕏 Twitter</a>
+      <a href="#">Telegram</a>
+      <a href="#">Discord</a>
+      <a href="index.html">Today's Card</a>
+      <a href="methodology.html">Methodology</a>
+    </div>
+    <div class="footer-copy">© 2026 EyeBlackIQ. Data beats hype.</div>
+  </div>
+</footer>
+
+<script>
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', ['daily','running','pod'][i] === tab);
+  });
+  document.querySelectorAll('.tab-content').forEach((c,i) => {
+    c.classList.toggle('active', ['tab-daily','tab-running','tab-pod'][i] === 'tab-'+tab);
+  });
+}
+
+const TIER_CLASS = { CONVICTION:'conviction', VALUE:'value', LEAN:'lean' };
+
+function netStr(n) {
+  const s = (n >= 0 ? '+' : '') + n.toFixed(2) + 'u';
+  return `<span class="${n >= 0 ? 'net-positive' : 'net-negative'}">${s}</span>`;
+}
+
+async function loadResults() {
+  try {
+    const res = await fetch('data/results.json?t=' + Date.now());
+    const data = await res.json();
+    renderDaily(data.picks || []);
+    renderRunning(data.daily_summaries || []);
+    renderPOD(data.pod_picks || []);
+  } catch(e) {
+    document.getElementById('daily-tbody').innerHTML =
+      '<tr><td colspan="9" style="color:var(--text-dim);text-align:center;padding:32px;">No results yet. Check back after the first game day.</td></tr>';
+    document.getElementById('running-tbody').innerHTML =
+      '<tr><td colspan="7" style="color:var(--text-dim);text-align:center;padding:32px;">No record yet.</td></tr>';
+    document.getElementById('pod-tbody').innerHTML =
+      '<tr><td colspan="8" style="color:var(--text-dim);text-align:center;padding:32px;">No POD results yet.</td></tr>';
+  }
+}
+
+function renderDaily(picks) {
+  if (!picks.length) {
+    document.getElementById('daily-tbody').innerHTML =
+      '<tr><td colspan="9" style="color:var(--text-dim);text-align:center;padding:32px;">No results posted yet.</td></tr>';
+    return;
+  }
+  document.getElementById('daily-tbody').innerHTML = [...picks].reverse().map(p => `
+    <tr>
+      <td>${p.date}</td>
+      <td><span class="tier-badge ${TIER_CLASS[p.tier] || ''}">${p.tier}</span></td>
+      <td style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;">${p.pick}</td>
+      <td style="color:var(--text-dim);font-size:13px;">${p.teams}</td>
+      <td style="color:var(--blue);">${p.line}</td>
+      <td>${p.units}u</td>
+      <td class="result-${(p.result||'').toLowerCase()}">${p.result === 'W' ? '✅ W' : p.result === 'L' ? '❌ L' : p.result === 'P' ? '➡️ P' : p.result || '—'}</td>
+      <td style="color:var(--text-dim);font-size:13px;">${p.score || '—'}</td>
+      <td>${p.net_units != null ? netStr(p.net_units) : '—'}</td>
+    </tr>
+  `).join('');
+}
+
+function renderRunning(summaries) {
+  if (!summaries.length) {
+    document.getElementById('running-tbody').innerHTML =
+      '<tr><td colspan="7" style="color:var(--text-dim);text-align:center;padding:32px;">No record yet.</td></tr>';
+    return;
+  }
+  document.getElementById('running-tbody').innerHTML = [...summaries].reverse().map(s => `
+    <tr>
+      <td>${s.date}</td>
+      <td>${s.day_w}-${s.day_l}-${s.day_p}</td>
+      <td>${netStr(s.day_net)}</td>
+      <td style="font-weight:700;">${s.season_w}-${s.season_l}-${s.season_p}</td>
+      <td>${netStr(s.season_net)}</td>
+      <td class="${s.season_roi >= 0 ? 'net-positive' : 'net-negative'}">${(s.season_roi >= 0 ? '+' : '')}${s.season_roi.toFixed(1)}%</td>
+      <td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;">${s.streak || '—'}</td>
+    </tr>
+  `).join('');
+}
+
+function renderPOD(pods) {
+  if (!pods.length) {
+    document.getElementById('pod-tbody').innerHTML =
+      '<tr><td colspan="8" style="color:var(--text-dim);text-align:center;padding:32px;">No POD results yet.</td></tr>';
+    return;
+  }
+  document.getElementById('pod-tbody').innerHTML = [...pods].reverse().map(p => `
+    <tr>
+      <td>${p.date}</td>
+      <td style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;">${p.pick}</td>
+      <td style="color:var(--text-dim);font-size:13px;">${p.teams}</td>
+      <td style="color:var(--blue);">${p.line}</td>
+      <td>${p.units}u</td>
+      <td class="result-${(p.result||'').toLowerCase()}">${p.result === 'W' ? '✅ W' : p.result === 'L' ? '❌ L' : p.result === 'P' ? '➡️ P' : '—'}</td>
+      <td style="color:var(--text-dim);font-size:13px;">${p.score || '—'}</td>
+      <td>${p.net_units != null ? netStr(p.net_units) : '—'}</td>
+    </tr>
+  `).join('');
+}
+
+async function loadRecord() {
+  try {
+    const res = await fetch('data/record.json?t=' + Date.now());
+    const r = await res.json();
+    document.getElementById('bar-record').textContent = `${r.wins}-${r.losses}-${r.pushes}`;
+    const net = r.net_units >= 0 ? `+${r.net_units.toFixed(1)}u` : `${r.net_units.toFixed(1)}u`;
+    document.getElementById('bar-units').textContent = net;
+    document.getElementById('bar-units').className = 'stat-value ' + (r.net_units >= 0 ? 'positive' : 'negative');
+    document.getElementById('bar-roi').textContent = (r.roi >= 0 ? '+' : '') + r.roi.toFixed(1) + '%';
+    document.getElementById('bar-roi').className = 'stat-value ' + (r.roi >= 0 ? 'positive' : 'negative');
+    document.getElementById('bar-pod').textContent = `${r.pod_wins}-${r.pod_losses}`;
+    document.getElementById('bar-streak').textContent = r.streak || '—';
+  } catch(e) {}
+}
+
+loadRecord();
+loadResults();
+</script>
+</body>
+</html>
