@@ -11,9 +11,15 @@ Model:
   - Run total: r_home + r_away (Poisson projection)
 
 Confidence levels (●●● / ●●○ / ●○○):
-  HIGH (●●●): SP with 5+ starts, ELO-ISR agree within 5pp
-  MED  (●●○): SP 2-4 starts or 5-8pp disagreement
-  LOW  (●○○): TBD SP, <2 starts, or early season (<10 team games)
+  HIGH (●●●): BOTH SPs confirmed + 5+ starts + ELO-ISR agree within 5pp
+  MED  (●●○): At least one SP confirmed, 2-4 starts or 5-8pp disagreement
+  LOW  (●○○): Either SP is TBD, <2 starts, or early season (<10 team games)
+
+SP Gate Rules:
+  BOTH TBD   → signal BLOCKED — no output, no DB write
+  ONE TBD    → max confidence = MED (●●○), add [SP?] flag
+  BOTH CONF  → normal confidence scoring
+  HIGH req.  → BOTH confirmed + sp_starts ≥ 5 + ELO/ISR gap ≤ 5pp
 
 Spread Alternative Rule:
   When ML > +250, signals include a run line (+1.5) alternative note.
@@ -75,19 +81,23 @@ def ncaa_tier(edge_pct):
 
 
 # ── Confidence ─────────────────────────────────────────────────────────────────
-def confidence(sp_starts: int, elo_isr_gap_pp: float, n_team_games: int = 15) -> tuple:
+def confidence(sp_starts: int, elo_isr_gap_pp: float, n_team_games: int = 15,
+               both_confirmed: bool = True, any_tbd: bool = False) -> tuple:
     """
     Returns (label, symbol) e.g. ('HIGH', '●●●')
 
     Scoring:
       Start at MED (2). Gain +1 for each strong signal, -1 for each weak signal.
 
-    sp_starts:       number of SP appearances this season
+    sp_starts:       avg SP appearances this season (home + away / 2)
     elo_isr_gap_pp:  abs(p_home_elo - p_home_isr) * 100 — model agreement
     n_team_games:    team games played (proxy for ISR reliability)
+    both_confirmed:  True if BOTH SPs are identified (not TBD)
+    any_tbd:         True if either SP is TBD
 
-    HIGH requires: 5+ SP starts AND model agreement within 5pp
-    LOW triggered by: <2 SP starts, or gap >10pp, or <10 team games
+    HIGH requires: BOTH SPs confirmed + 5+ starts + model agreement within 5pp
+    MED cap:       If any SP is TBD, max score = 2 (can never be HIGH)
+    LOW triggered: <2 SP starts, or gap >10pp, or <10 team games
     """
     score = 2  # start MEDIUM
     if sp_starts >= 5:        score += 1
@@ -95,6 +105,9 @@ def confidence(sp_starts: int, elo_isr_gap_pp: float, n_team_games: int = 15) ->
     if elo_isr_gap_pp <= 5:   score += 1
     elif elo_isr_gap_pp > 10: score -= 1
     if n_team_games < 10:     score -= 1
+    # SP confirmation gates
+    if any_tbd:               score = min(score, 2)   # cap at MED with any TBD SP
+    if not both_confirmed:    score = min(score, 2)   # belt-and-suspenders
     score = max(1, min(3, score))
     return {3: ("HIGH", "●●●"), 2: ("MED", "●●○"), 1: ("LOW", "●○○")}[score]
 
@@ -317,7 +330,8 @@ def lookup(team_name: str, elo_map: dict, isr_map: dict) -> tuple:
 # ── Core projection ────────────────────────────────────────────────────────────
 def project_game(away: str, home: str, sp_era_away: float, sp_era_home: float,
                  sp_starts_away: int, sp_starts_home: int,
-                 elo_map: dict, isr_map: dict) -> dict:
+                 elo_map: dict, isr_map: dict,
+                 sp_names: dict = None) -> dict:
     """
     Returns full projection dict for one game.
 
@@ -325,7 +339,10 @@ def project_game(away: str, home: str, sp_era_away: float, sp_era_home: float,
     sp_era_*:         starting pitcher ERA for this game
     sp_starts_*:      number of starts SP has made this season (confidence proxy)
     elo_map/isr_map:  loaded from load_elo_isr()
+    sp_names:         dict with keys 'sp_away','sp_home' — used for SP gate
     """
+    if sp_names is None:
+        sp_names = {"sp_away": "TBD", "sp_home": "TBD"}
     elo_a, isr_a = lookup(away, elo_map, isr_map)
     elo_h, isr_h = lookup(home, elo_map, isr_map)
 
@@ -350,10 +367,17 @@ def project_game(away: str, home: str, sp_era_away: float, sp_era_home: float,
     # Run total projection
     proj_total = round(r_away + r_home, 1)
 
-    # Confidence
-    elo_isr_gap = abs(p_home_elo - p_home_isr) * 100
-    avg_starts  = (sp_starts_away + sp_starts_home) / 2
-    conf_label, conf_sym = confidence(int(avg_starts), elo_isr_gap)
+    # Confidence — SP confirmation aware
+    elo_isr_gap     = abs(p_home_elo - p_home_isr) * 100
+    avg_starts      = (sp_starts_away + sp_starts_home) / 2
+    _sp_away_ok     = sp_names.get("sp_away", "TBD") != "TBD"
+    _sp_home_ok     = sp_names.get("sp_home", "TBD") != "TBD"
+    both_confirmed  = _sp_away_ok and _sp_home_ok
+    any_tbd         = not _sp_away_ok or not _sp_home_ok
+    conf_label, conf_sym = confidence(
+        int(avg_starts), elo_isr_gap,
+        both_confirmed=both_confirmed, any_tbd=any_tbd
+    )
 
     return {
         "away": away, "home": home,
@@ -362,7 +386,11 @@ def project_game(away: str, home: str, sp_era_away: float, sp_era_home: float,
         "elo_a": elo_a, "elo_h": elo_h,
         "isr_a": isr_a, "isr_h": isr_h,
         "sp_era_away": sp_era_away, "sp_era_home": sp_era_home,
+        "sp_away": sp_names.get("sp_away", "TBD"),
+        "sp_home": sp_names.get("sp_home", "TBD"),
         "sp_starts_away": sp_starts_away, "sp_starts_home": sp_starts_home,
+        "both_sp_confirmed": both_confirmed,
+        "any_sp_tbd": any_tbd,
         "r_away": r_away, "r_home": r_home,
         "proj_total": proj_total,
         "conf_label": conf_label, "conf_sym": conf_sym,
@@ -443,19 +471,26 @@ def load_games_from_cache(date_str: str) -> list:
     logger.info("Using hardcoded NCAA slate (cache not available)")
 
     slates = {
-        # Mar 21 — Game 2 of weekend series (SPs confirmed from team sites)
+        # Mar 21 — Game 2 of weekend series
+        # SP data confirmed from team athletic sites + user-provided screenshots
         "2026-03-21": [
-            # Big Ten
-            {"away": "Northwestern", "home": "Oregon",    "mkt_away": +350,   "mkt_home": -500,   "sp_era_away": 5.10, "sp_era_home": 3.90, "sp_starts_away": 5, "sp_starts_home": 6, "sp_away": "TBD",           "sp_home": "TBD",                   "game_time": "5:05 PM ET"},
-            {"away": "Minnesota",    "home": "Indiana",   "mkt_away": -125,   "mkt_home": +105,   "sp_era_away": 2.05, "sp_era_home": 2.95, "sp_starts_away": 5, "sp_starts_home": 4, "sp_away": "Isaac Morton",  "sp_home": "Brayton Thomas",        "game_time": "2:00 PM ET"},
-            {"away": "Maryland",     "home": "UCLA",      "mkt_away": +350,   "mkt_home": -500,   "sp_era_away": 4.50, "sp_era_home": 2.80, "sp_starts_away": 4, "sp_starts_home": 6, "sp_away": "TBD",           "sp_home": "TBD",                   "game_time": "5:00 PM ET"},
-            {"away": "Washington",   "home": "USC",       "mkt_away": +400,   "mkt_home": -600,   "sp_era_away": 5.40, "sp_era_home": 0.27, "sp_starts_away": 3, "sp_starts_home": 7, "sp_away": "TBD",           "sp_home": "Grant Govel",           "game_time": "10:00 PM ET"},
-            # Big 12
-            {"away": "BYU",          "home": "West Virginia", "mkt_away": +1400, "mkt_home": -10000, "sp_era_away": 6.30, "sp_era_home": 0.72, "sp_starts_away": 4, "sp_starts_home": 5, "sp_away": "Waylan Crane", "sp_home": "Maxx Yehl",            "game_time": "1:00 PM ET"},
-            # SEC
-            {"away": "Oklahoma",     "home": "LSU",       "mkt_away": +110,   "mkt_home": -145,   "sp_era_away": 4.71, "sp_era_home": 3.12, "sp_starts_away": 5, "sp_starts_home": 6, "sp_away": "Cord Rager",    "sp_home": "William Schmidt",       "game_time": "3:00 PM ET"},
-            {"away": "Florida",      "home": "Alabama",   "mkt_away": -185,   "mkt_home": +140,   "sp_era_away": 3.70, "sp_era_home": 4.20, "sp_starts_away": 6, "sp_starts_home": 5, "sp_away": "Aidan King",     "sp_home": "Zane Adams",            "game_time": "3:00 PM ET"},
-            {"away": "Texas",        "home": "Auburn",    "mkt_away": -135,   "mkt_home": +105,   "sp_era_away": 3.06, "sp_era_home": 2.76, "sp_starts_away": 5, "sp_starts_home": 5, "sp_away": "Luke Harrison",  "sp_home": "Jackson Sanders",       "game_time": "6:00 PM ET"},
+            # Big Ten — NW/ORE SPs unknown → will be blocked by SP gate
+            {"away": "Northwestern", "home": "Oregon",    "mkt_away": +350,   "mkt_home": -500,   "sp_era_away": 5.10, "sp_era_home": 3.90, "sp_starts_away": 5, "sp_starts_home": 6, "sp_away": "TBD",              "sp_home": "TBD",                   "game_time": "5:05 PM ET"},
+            # Minnesota @ Indiana — CONFIRMED SPs (Isaac Morton 2.05 ERA, Brayton Thomas 2.95 ERA)
+            {"away": "Minnesota",    "home": "Indiana",   "mkt_away": -125,   "mkt_home": +105,   "sp_era_away": 2.05, "sp_era_home": 2.95, "sp_starts_away": 5, "sp_starts_home": 4, "sp_away": "I. Morton",         "sp_home": "B. Thomas",             "game_time": "2:00 PM ET"},
+            # Maryland @ UCLA — CONFIRMED: E. Smith (8.00 ERA) vs M. Barnett (2.78 ERA)
+            {"away": "Maryland",     "home": "UCLA",      "mkt_away": +350,   "mkt_home": -500,   "sp_era_away": 8.00, "sp_era_home": 2.78, "sp_starts_away": 2, "sp_starts_home": 5, "sp_away": "E. Smith",          "sp_home": "M. Barnett",            "game_time": "5:00 PM ET"},
+            # Washington @ USC — CONFIRMED: J. Thomas (5.14 ERA) vs G. Govel (0.27 ERA)
+            {"away": "Washington",   "home": "USC",       "mkt_away": +400,   "mkt_home": -600,   "sp_era_away": 5.14, "sp_era_home": 0.27, "sp_starts_away": 5, "sp_starts_home": 7, "sp_away": "J. Thomas",         "sp_home": "G. Govel",              "game_time": "10:00 PM ET"},
+            # Big 12 — BYU: Waylan Crane (6.30 ERA) vs WVU: Maxx Yehl (0.72 ERA) CONFIRMED
+            {"away": "BYU",          "home": "West Virginia", "mkt_away": +1400, "mkt_home": -10000, "sp_era_away": 6.30, "sp_era_home": 0.72, "sp_starts_away": 4, "sp_starts_home": 5, "sp_away": "W. Crane",         "sp_home": "M. Yehl",               "game_time": "1:00 PM ET"},
+            # SEC — Oklahoma: Cord Rager (4.71 ERA) vs LSU: William Schmidt (3.12 ERA) CONFIRMED
+            {"away": "Oklahoma",     "home": "LSU",       "mkt_away": +110,   "mkt_home": -145,   "sp_era_away": 4.71, "sp_era_home": 3.12, "sp_starts_away": 5, "sp_starts_home": 6, "sp_away": "C. Rager",          "sp_home": "W. Schmidt",            "game_time": "3:00 PM ET"},
+            # Florida: Aidan King (0.00 ERA — 23.1 IP, 26 SO, 0 ER, 2026 All-American)
+            # Alabama: Zane Adams (4.46 ERA — 24.2 IP, 12 ER, Sat starter)  BOTH CONFIRMED
+            {"away": "Florida",      "home": "Alabama",   "mkt_away": -185,   "mkt_home": +140,   "sp_era_away": 0.00, "sp_era_home": 4.46, "sp_starts_away": 5, "sp_starts_home": 5, "sp_away": "A. King",           "sp_home": "Z. Adams",              "game_time": "3:00 PM ET"},
+            # Texas: Luke Harrison (3.06 ERA) vs Auburn: Jackson Sanders (2.76 ERA) CONFIRMED
+            {"away": "Texas",        "home": "Auburn",    "mkt_away": -135,   "mkt_home": +105,   "sp_era_away": 3.06, "sp_era_home": 2.76, "sp_starts_away": 5, "sp_starts_home": 5, "sp_away": "L. Harrison",       "sp_home": "J. Sanders",            "game_time": "6:00 PM ET"},
         ],
         # Mar 20 — Game 1 results: Oregon 20-6, Indiana 8-6, UCLA 12-2, USC 5-0, WVU 12-10, OU 4-2, ALA 6-0, AUB 4-3(WO)
         "2026-03-20": [
@@ -534,19 +569,30 @@ def run_model(date_str: str, dry_run: bool = False) -> int:
         sp_away_name = g.get("sp_away", "TBD")
         sp_home_name = g.get("sp_home", "TBD")
 
+        # ── SP GATE ───────────────────────────────────────────────────────────
+        # BOTH TBD → block entirely. ONE TBD → allowed but capped at MED conf.
+        sp_a_ok = sp_away_name != "TBD"
+        sp_h_ok = sp_home_name != "TBD"
+        if not sp_a_ok and not sp_h_ok:
+            logger.info(f"  BLOCKED [{away} @ {home}]: Both SPs unconfirmed — no signal (run model after SPs are set)")
+            continue
+
         proj = project_game(
             away, home,
             g["sp_era_away"], g["sp_era_home"],
             g.get("sp_starts_away", 3), g.get("sp_starts_home", 3),
             elo_map, isr_map,
+            sp_names={"sp_away": sp_away_name, "sp_home": sp_home_name},
         )
 
         game_str  = f"{away} @ {home}"
         game_time = g.get("game_time", "TBD")
         mkt_a, mkt_h = g.get("mkt_away"), g.get("mkt_home")
 
-        # Log SP info
-        sp_info = f"SP: {sp_away_name} (ERA {g['sp_era_away']:.2f}) vs {sp_home_name} (ERA {g['sp_era_home']:.2f})"
+        # SP display with confirmed/TBD flag
+        sp_flag   = "" if (sp_a_ok and sp_h_ok) else " [SP?]"
+        sp_info   = (f"SP: {sp_away_name} (ERA {g['sp_era_away']:.2f}) "
+                     f"vs {sp_home_name} (ERA {g['sp_era_home']:.2f}){sp_flag}")
 
         logger.info(
             f"  {game_str}  P_home={proj['p_home']:.3f}  "
@@ -586,28 +632,34 @@ def run_model(date_str: str, dry_run: bool = False) -> int:
             # Conference ISR — context/notation only, not a model input
             conf_ctx = get_conf_isr_context(side_name)
 
-            # Spread alternative flag for big dogs
-            rl_note = rl_alt_note(odds)
+            # Spread/run-line alternative for big dogs (ML > +250)
+            rl_note   = rl_alt_note(odds)
+            rl_primary = odds > RL_ALT_THRESHOLD  # flag to promote RL to primary on slip
+
+            # SP confirmation flag for notes
+            sp_conf_note = "" if proj["both_sp_confirmed"] else " [ONE SP UNCONFIRMED]"
 
             notes = (
                 f"ELO={elo_display:.0f}  "
                 f"ISR={isr_display:.1f} {conf_ctx}  "
-                f"SP={sp_name} (ERA {era_display:.2f})  "
+                f"SP={sp_name} (ERA {era_display:.2f}){sp_conf_note}  "
                 f"Proj_Total={proj['proj_total']}  "
                 f"Conf={proj['conf_label']} {proj['conf_sym']}  "
                 f"ELO-ISR_gap={proj['elo_isr_gap_pp']:.1f}pp"
-                f"{rl_note}"
+                + (f"  | RL_PRIMARY=True (ML {odds:+d} exceeds +{RL_ALT_THRESHOLD})" if rl_primary else "")
             )
 
-            # POD status logged
-            is_pod_flag = proj["conf_label"] == "HIGH" and units >= 1.5
-            pod_tag = "  [POD CANDIDATE]" if is_pod_flag else ""
+            # POD: requires HIGH confidence (BOTH SPs confirmed + 5+ starts + <5pp gap)
+            is_pod_flag = proj["conf_label"] == "HIGH" and units >= 1.5 and proj["both_sp_confirmed"]
+            pod_tag = "  ★ POD CANDIDATE" if is_pod_flag else ""
+
+            # Run-line primary indicator
+            rl_tag = "  → RECOMMEND +1.5 RL AS PRIMARY BET" if rl_primary else ""
 
             logger.info(
                 f"    SIGNAL: {side_name} ML {odds:+d}  "
                 f"Edge {edge_pct:.1f}%  {tier_name}  {units}u  "
-                f"Conf {proj['conf_sym']}{pod_tag}"
-                + (f"\n    {rl_note.strip()}" if rl_note else "")
+                f"Conf {proj['conf_sym']}{pod_tag}{rl_tag}"
             )
 
             if not dry_run and conn is not None:
