@@ -1,0 +1,199 @@
+{
+  "date": "2026-03-10",
+  "generated_at": "2026-03-10T14:56:40",
+  "model_version": "v3",
+  "wheelhouse": [
+    {
+      "away": "Troy Trojans",
+      "home": "Alabama",
+      "bet": "Alabama ML",
+      "wp": 0.8386,
+      "ev": 0.093,
+      "units": 2.0,
+      "away_ml": 240,
+      "home_ml": -330,
+      "pred_total": 11.47,
+      "ou_line": 12.5
+    },
+    {
+      "away": "Saint Mary's Gaels",
+      "home": "UC Santa Barbara",
+      "bet": "UC Santa Barbara ML",
+      "wp": 0.8237,
+      "ev": 0.073,
+      "units": 2.0,
+      "away_ml": 240,
+      "home_ml": -330,
+      "pred_total": 11.72,
+      "ou_line": 11.0
+    }
+  ],
+  "filthy": [
+    {
+      "away": "Wichita St Shockers",
+      "home": "Kansas St Wildcats",
+      "bet": "Kansas St Wildcats ML",
+      "wp": 0.7184,
+      "ev": 0.045,
+      "units": 1.5,
+      "away_ml": 170,
+      "home_ml": -220,
+      "pred_total": 9.82,
+      "ou_line": 12.5
+    },
+    {
+      "away": "Wright St Raiders",
+      "home": "Indiana",
+      "bet": "Indiana ML",
+      "wp": 0.7132,
+      "ev": 0.121,
+      "units": 1.5,
+      "away_ml": 135,
+      "home_ml": -175,
+      "pred_total": 12.68,
+      "ou_line": 16.0
+    },
+    {
+      "away": "Texas-San Antonio",
+      "home": "Texas Tech",
+      "bet": "Texas Tech ML",
+      "wp": 0.6786,
+      "ev": 0.52,
+      "units": 1.5,
+      "away_ml": -160,
+      "home_ml": 124,
+      "pred_total": 14.52,
+      "ou_line": 16.5
+    },
+    {
+      "away": "Charleston Southern Buccaneers",
+      "home": "UNC Wilmington Seahawks",
+      "bet": "UNC Wilmington Seahawks ML",
+      "wp": 0.6717,
+      "ev": 0.152,
+      "units": 1.5,
+      "away_ml": 110,
+      "home_ml": -140,
+      "pred_total": 11.78,
+      "ou_line": 12.0
+    },
+    {
+      "away": "Mississippi",
+      "home": "Southern Mississippi",
+      "bet": "Southern Mississippi ML",
+      "wp": 0.6535,
+      "ev": 0.12,
+      "units": 1.5,
+      "away_ml": 110,
+      "home_ml": -140,
+      "pred_total": 10.79,
+      "ou_line": 10.5
+    }
+  ],
+  "ou": [
+    {
+      "away": "Wichita St Shockers",
+      "home": "Kansas St Wildcats",
+      "bet": "UNDER 12.5",
+      "gap": -2.68,
+      "sp_status": "confirmed",
+      "pred_total": 9.82,
+      "ou_line": 12.5,
+      "units": 1.0
+    },
+    {
+      "away": "Wright St Raiders",
+      "home": "Indiana",
+      "bet": "UNDER 16.0",
+      "gap": -3.32,
+      "sp_status": "avg_sp",
+      "pred_total": 12.68,
+      "ou_line": 16.0,
+      "units": 1.0
+    },
+    {
+      "away": "Texas-San Antonio",
+      "home": "Texas Tech",
+      "bet": "UNDER 16.5",
+      "gap": -1.98,
+      "sp_status": "confirmed",
+      "pred_total": 14.52,
+      "ou_line": 16.5,
+      "units": 1.0
+    },
+    {
+      "away": "Maryland",
+      "home": "West Virginia",
+      "bet": "UNDER 13.5",
+      "gap": -2.04,
+      "sp_status": "confirmed",
+      "pred_total": 11.46,
+      "ou_line": 13.5,
+      "units": 1.0
+    },
+    {
+      "away": "Wofford",
+      "home": "South Carolina Upstate Spartans",
+      "bet": "UNDER 14.5",
+      "gap": -2.26,
+      "sp_status": "confirmed",
+      "pred_total": 12.24,
+      "ou_line": 14.5,
+      "units": 1.0
+    },
+    {
+      "away": "Dallas Baptist",
+      "home": "Oklahoma St Cowboys",
+      "bet": "UNDER 16.0",
+      "gap": -3.29,
+      "sp_status": "avg_sp",
+      "pred_total": 12.71,
+      "ou_line": 16.0,
+      "units": 1.0
+    },
+    {
+      "away": "Florida St Seminoles",
+      "home": "Florida",
+      "bet": "UNDER 13.0",
+      "gap": -1.92,
+      "sp_status": "confirmed",
+      "pred_total": 11.08,
+      "ou_line": 13.0,
+      "units": 1.0
+    },
+    {
+      "away": "Kansas",
+      "home": "Texas Christian",
+      "bet": "OVER 10.0",
+      "gap": 2.28,
+      "sp_status": "avg_sp",
+      "pred_total": 12.28,
+      "ou_line": 10.0,
+      "units": 1.0
+    },
+    {
+      "away": "Mississippi St Bulldogs",
+      "home": "Tulane",
+      "bet": "UNDER 13.0",
+      "gap": -1.64,
+      "sp_status": "confirmed",
+      "pred_total": 11.36,
+      "ou_line": 13.0,
+      "units": 1.0
+    }
+  ],
+  "pod": {
+    "away": "Texas-San Antonio",
+    "home": "Texas Tech",
+    "bet": "Texas Tech ML",
+    "wp": 0.6786,
+    "ev": 0.52,
+    "units": 1.5,
+    "away_ml": -160,
+    "home_ml": 124,
+    "pred_total": 14.52,
+    "ou_line": 16.5
+  },
+  "pass_count": 15,
+  "total_games": 22
+}

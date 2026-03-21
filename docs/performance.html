@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EyeBlackIQ  |  Performance</title>
+  
+<style>
+  :root {
+    --bg:    #0D0D0D;
+    --text:  #F0EDE8;
+    --accent:#DC143C;
+    --data:  #4A90D9;
+    --gold:  #B8960C;
+    --card:  #1a1a1a;
+    --border:#2a2a2a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  header {
+    background: #0a0a0a;
+    border-bottom: 2px solid var(--accent);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  header h1 { font-size: 1.4rem; letter-spacing: .05em; color: var(--text); }
+  header .tagline { font-size: .8rem; color: #888; }
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: #111;
+    padding: 0 1rem;
+  }
+  .tab-btn {
+    padding: .7rem 1.2rem;
+    border: none;
+    background: transparent;
+    color: #888;
+    font-size: .9rem;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: .2s;
+  }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-panel { display: none; padding: 1.5rem; max-width: 960px; margin: 0 auto; }
+  .tab-panel.active { display: block; }
+  .pick-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.2rem;
+    margin-bottom: .8rem;
+  }
+  .pick-card.wheelhouse { border-left: 4px solid var(--accent); }
+  .pick-card.filthy     { border-left: 4px solid var(--data); }
+  .pick-card.ou         { border-left: 4px solid var(--gold); }
+  .pick-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: .4rem;
+  }
+  .tier-badge {
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    padding: .2rem .6rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+  .badge-wheelhouse { background: var(--accent); color: #fff; }
+  .badge-filthy     { background: var(--data);   color: #fff; }
+  .badge-ou         { background: var(--gold);   color: #000; }
+  .pick-bet  { font-size: 1.05rem; font-weight: 600; }
+  .pick-meta { font-size: .82rem; color: #aaa; margin-top: .3rem; }
+  .pick-meta span { margin-right: 1rem; }
+  .ev-pos { color: #4caf50; }
+  .ev-neg { color: var(--accent); }
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: .8rem;
+    margin-bottom: 1.5rem;
+  }
+  .kpi-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: .8rem 1rem;
+    text-align: center;
+  }
+  .kpi-val { font-size: 1.5rem; font-weight: 700; color: var(--accent); }
+  .kpi-lbl { font-size: .78rem; color: #888; margin-top: .2rem; }
+  .no-picks {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+    font-size: 1rem;
+  }
+  .section-hdr {
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #666;
+    margin: 1rem 0 .6rem;
+  }
+  footer {
+    text-align: center;
+    padding: 1.5rem;
+    font-size: .75rem;
+    color: #444;
+    border-top: 1px solid var(--border);
+  }
+  a { color: var(--data); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+</style>
+
+  <style>
+    .bracket-row { display:flex; gap:.8rem; flex-wrap:wrap; margin-bottom:1.2rem; }
+    table { width:100%; border-collapse:collapse; }
+    thead th { padding:.5rem .8rem; font-size:.75rem; letter-spacing:.08em;
+                text-transform:uppercase; color:#666; text-align:left;
+                border-bottom:1px solid #2a2a2a; }
+    tbody tr:hover { background:#1a1a1a; }
+    .chart-box { background:var(--card); border:1px solid var(--border);
+                  border-radius:8px; padding:1rem; margin-bottom:1.2rem; }
+    .section-title { font-size:.78rem; font-weight:700; letter-spacing:.1em;
+                      text-transform:uppercase; color:#666; margin:1.4rem 0 .7rem; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<header>
+  <div>
+    <h1>EyeBlackIQ  ·  Season Performance</h1>
+    <div class="tagline">NCAA Baseball 2026 · Model v3 · Through 2026-03-12</div>
+  </div>
+  <nav style="font-size:.78rem;display:flex;gap:1.2rem;align-items:center">
+    <a href="index.html">Today's Picks</a>
+    <a href="methodology.html">Methodology</a>
+    <a href="playbook.html">The Playbook</a>
+  </nav>
+</header>
+
+<div style="padding:1.5rem;max-width:960px;margin:0 auto">
+
+  <!-- ── AGGREGATE ──────────────────────────────────────────────────── -->
+  <div class="section-title">📊 Aggregate Record</div>
+  <div class="kpi-row">
+    <div class="kpi-card"><div class="kpi-val" style="color:var(--accent)">26-12</div><div class="kpi-lbl">Overall Record</div></div>
+    <div class="kpi-card"><div class="kpi-val" style="color:var(--accent)">68.4%</div><div class="kpi-lbl">Win Rate</div></div>
+    <div class="kpi-card"><div class="kpi-val" style="color:#4caf50">+3.12u</div><div class="kpi-lbl">Season P&amp;L</div></div>
+    <div class="kpi-card"><div class="kpi-val" style="color:var(--accent)">38</div><div class="kpi-lbl">Graded Picks</div></div>
+  </div>
+
+  <!-- ── TIER BRACKETS ──────────────────────────────────────────────── -->
+  <div class="section-title">🏆 Tier Brackets</div>
+  <div class="bracket-row">
+    
+<div style="background:var(--card);background:linear-gradient(180deg,#DC143C18 0%,var(--card) 40%);border-top:3px solid #DC143C;border-radius:8px;padding:1rem 1.2rem;flex:1;min-width:170px">
+  <div style="font-size:.75rem;font-weight:700;letter-spacing:.1em;color:#DC143C;
+              text-transform:uppercase;margin-bottom:.5rem">🎯 Wheelhouse</div>
+  <div style="font-size:1.7rem;font-weight:700;line-height:1.1">13-3</div>
+  <div style="font-size:.82rem;color:#888;margin:.1rem 0 .6rem">81.2% Win Rate</div>
+  <div style="font-size:1.1rem;font-weight:600;color:#4caf50">+2.76u</div>
+</div>
+    
+<div style="background:var(--card);border-top:3px solid #4A90D9;border-radius:8px;padding:1rem 1.2rem;flex:1;min-width:170px">
+  <div style="font-size:.75rem;font-weight:700;letter-spacing:.1em;color:#4A90D9;
+              text-transform:uppercase;margin-bottom:.5rem">🔥 Filthy</div>
+  <div style="font-size:1.7rem;font-weight:700;line-height:1.1">7-6</div>
+  <div style="font-size:.82rem;color:#888;margin:.1rem 0 .6rem">53.8% Win Rate</div>
+  <div style="font-size:1.1rem;font-weight:600;color:#DC143C">-2.10u</div>
+</div>
+    
+<div style="background:var(--card);border-top:3px solid #B8960C;border-radius:8px;padding:1rem 1.2rem;flex:1;min-width:170px">
+  <div style="font-size:.75rem;font-weight:700;letter-spacing:.1em;color:#B8960C;
+              text-transform:uppercase;margin-bottom:.5rem">📏 Over-Under</div>
+  <div style="font-size:1.7rem;font-weight:700;line-height:1.1">6-3</div>
+  <div style="font-size:.82rem;color:#888;margin:.1rem 0 .6rem">66.7% Win Rate</div>
+  <div style="font-size:1.1rem;font-weight:600;color:#4caf50">+2.46u</div>
+</div>
+  </div>
+
+  <!-- ── CUMULATIVE P&L CHART ───────────────────────────────────────── -->
+  <div class="section-title">📈 Cumulative P&amp;L</div>
+  <div class="chart-box">
+    <canvas id="pnlChart" height="160"></canvas>
+  </div>
+
+  <!-- ── WINS / LOSSES BY TIER BAR CHART ───────────────────────────── -->
+  <div class="section-title">🏅 Wins &amp; Losses by Tier</div>
+  <div class="chart-box">
+    <canvas id="tierChart" height="140"></canvas>
+  </div>
+
+  <!-- ── DAY-BY-DAY RESULTS ─────────────────────────────────────────── -->
+  <div class="section-title">📅 Day-by-Day Results</div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:auto;margin-bottom:1.2rem">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th style="text-align:center">Overall</th>
+          <th style="text-align:center;color:#DC143C">Wheelhouse</th>
+          <th style="text-align:center;color:#4A90D9">Filthy</th>
+          <th style="text-align:center;color:#B8960C">O/U</th>
+          <th style="text-align:right">P&amp;L</th>
+        </tr>
+      </thead>
+      <tbody>
+<tr>
+  <td style="padding:.5rem .8rem;font-weight:600">2026-03-11</td>
+  <td style="padding:.5rem .8rem;text-align:center">3-3</td>
+  <td style="padding:.5rem .8rem;text-align:center;color:#DC143C">2-0</td>
+  <td style="padding:.5rem .8rem;text-align:center;color:#4A90D9">0-3</td>
+  <td style="padding:.5rem .8rem;text-align:center;color:#B8960C">1-0</td>
+  <td style="padding:.5rem .8rem;text-align:right;color:#DC143C;font-weight:600">-2.60u</td>
+</tr>
+<tr>
+  <td style="padding:.5rem .8rem;font-weight:600">2026-03-10</td>
+  <td style="padding:.5rem .8rem;text-align:center">9-4</td>
+  <td style="padding:.5rem .8rem;text-align:center;color:#DC143C">2-0</td>
+  <td style="padding:.5rem .8rem;text-align:center;color:#4A90D9">3-2</td>
+  <td style="padding:.5rem .8rem;text-align:center;color:#B8960C">4-2</td>
+  <td style="padding:.5rem .8rem;text-align:right;color:#4caf50;font-weight:600">+2.47u</td>
+</tr>
+<tr>
+  <td style="padding:.5rem .8rem;font-weight:600">2026-03-09</td>
+  <td style="padding:.5rem .8rem;text-align:center">1-0</td>
+  <td style="padding:.5rem .8rem;text-align:center;color:#DC143C">1-0</td>
+  <td style="padding:.5rem .8rem;text-align:center;color:#4A90D9">0-0</td>
+  <td style="padding:.5rem .8rem;text-align:center;color:#B8960C">0-0</td>
+  <td style="padding:.5rem .8rem;text-align:right;color:#4caf50;font-weight:600">+0.61u</td>
+</tr>
+<tr>
+  <td style="padding:.5rem .8rem;font-weight:600">2026-03-08</td>
+  <td style="padding:.5rem .8rem;text-align:center">5-2</td>
+  <td style="padding:.5rem .8rem;text-align:center;color:#DC143C">5-2</td>
+  <td style="padding:.5rem .8rem;text-align:center;color:#4A90D9">0-0</td>
+  <td style="padding:.5rem .8rem;text-align:center;color:#B8960C">0-0</td>
+  <td style="padding:.5rem .8rem;text-align:right;color:#DC143C;font-weight:600">-0.21u</td>
+</tr>
+<tr>
+  <td style="padding:.5rem .8rem;font-weight:600">2026-03-07</td>
+  <td style="padding:.5rem .8rem;text-align:center">8-3</td>
+  <td style="padding:.5rem .8rem;text-align:center;color:#DC143C">3-1</td>
+  <td style="padding:.5rem .8rem;text-align:center;color:#4A90D9">4-1</td>
+  <td style="padding:.5rem .8rem;text-align:center;color:#B8960C">1-1</td>
+  <td style="padding:.5rem .8rem;text-align:right;color:#4caf50;font-weight:600">+2.85u</td>
+</tr></tbody>
+    </table>
+  </div>
+
+  <!-- ── FULL PICKS HISTORY ─────────────────────────────────────────── -->
+  <details style="margin-bottom:1.5rem">
+    <summary style="cursor:pointer;font-size:.78rem;font-weight:700;letter-spacing:.1em;
+                    text-transform:uppercase;color:#666;padding:.4rem 0;
+                    list-style:none;display:flex;align-items:center;gap:.5rem">
+      <span>▶</span> Full Picks History (38 picks)
+    </summary>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;
+                overflow:auto;margin-top:.7rem">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th><th>Pick</th><th>Matchup</th>
+            <th style="text-align:center">Tier</th>
+            <th style="text-align:center">Result</th>
+            <th style="text-align:right">P&amp;L</th>
+            <th style="text-align:right">EV</th>
+          </tr>
+        </thead>
+        <tbody>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-11</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">UNDER 16.5</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Texas-San Antonio @ Texas Tech</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">OU</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#4caf50">WIN</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#4caf50;font-size:.85rem">+0.91u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">0.0%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-11</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">Central Florida ML</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Miami Florida @ Central Florida</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">FILTHY</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#DC143C">LOSS</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#DC143C;font-size:.85rem">-1.50u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">+44.5%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-11</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">Texas-San Antonio ML</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Texas-San Antonio @ Texas Tech</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">FILTHY</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#DC143C">LOSS</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#DC143C;font-size:.85rem">-1.50u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">+32.8%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-11</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">NJIT Highlanders ML</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Seton Hall Pirates @ NJIT Highlanders</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">FILTHY</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#DC143C">LOSS</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#DC143C;font-size:.85rem">-1.50u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">+37.7%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-11</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">Minnesota ML</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Gonzaga @ Minnesota</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">WHEELHOUSE</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#4caf50">WIN</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#4caf50;font-size:.85rem">+0.63u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">+18.9%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-11</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">Oregon ML</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Xavier @ Oregon</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">WHEELHOUSE</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#4caf50">WIN</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#4caf50;font-size:.85rem">+0.36u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">+14.6%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-10</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">UNDER 13.0</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Florida St Seminoles @ Florida</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">OU</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#4caf50">WIN</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#4caf50;font-size:.85rem">+0.91u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">0.0%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-10</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">UNDER 16.0</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Dallas Baptist @ Oklahoma St Cowboys</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">OU</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#4caf50">WIN</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#4caf50;font-size:.85rem">+0.91u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">0.0%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-10</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">UNDER 13.5</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Maryland @ West Virginia</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">OU</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#4caf50">WIN</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#4caf50;font-size:.85rem">+0.91u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">0.0%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-10</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">UNDER 16.5</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Texas-San Antonio @ Texas Tech</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">OU</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#DC143C">LOSS</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#DC143C;font-size:.85rem">-1.00u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">0.0%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-10</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">UNDER 16.0</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Wright St Raiders @ Indiana</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">OU</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#DC143C">LOSS</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#DC143C;font-size:.85rem">-1.00u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">0.0%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-10</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">UNDER 12.5</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Wichita St Shockers @ Kansas St Wildcats</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">OU</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#4caf50">WIN</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#4caf50;font-size:.85rem">+0.91u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">0.0%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-10</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">Southern Mississippi ML</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Mississippi @ Southern Mississippi</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">FILTHY</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#DC143C">LOSS</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#DC143C;font-size:.85rem">-1.50u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">+12.0%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-10</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">UNC Wilmington Seahawks ML</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Charleston Southern Buccaneers @ UNC Wilmington Seahawks</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">FILTHY</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#4caf50">WIN</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#4caf50;font-size:.85rem">+1.07u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">+15.2%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-10</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">Texas Tech ML</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Texas-San Antonio @ Texas Tech</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">FILTHY</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#DC143C">LOSS</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#DC143C;font-size:.85rem">-1.50u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">+52.0%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-10</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">Indiana ML</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Wright St Raiders @ Indiana</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">FILTHY</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#4caf50">WIN</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#4caf50;font-size:.85rem">+0.86u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">+12.1%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-10</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">Kansas St Wildcats ML</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Wichita St Shockers @ Kansas St Wildcats</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">FILTHY</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#4caf50">WIN</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#4caf50;font-size:.85rem">+0.68u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">+4.5%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-10</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">UC Santa Barbara ML</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Saint Mary's Gaels @ UC Santa Barbara</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">WHEELHOUSE</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#4caf50">WIN</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#4caf50;font-size:.85rem">+0.61u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">+7.3%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-10</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">Alabama ML</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Troy Trojans @ Alabama</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">WHEELHOUSE</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#4caf50">WIN</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#4caf50;font-size:.85rem">+0.61u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">+9.3%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-09</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">Oregon St Beavers ML</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Xavier @ Oregon St Beavers</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">WHEELHOUSE</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#4caf50">WIN</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#4caf50;font-size:.85rem">+0.61u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">+10.6%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-08</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">Southern California ML</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Illinois @ Southern California</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">WHEELHOUSE</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#4caf50">WIN</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#4caf50;font-size:.85rem">+0.67u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">+18.0%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-08</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">Troy Trojans ML</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Maryland @ Troy Trojans</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">WHEELHOUSE</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#DC143C">LOSS</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#DC143C;font-size:.85rem">-2.00u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">+23.6%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-08</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">Oregon ML</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Oregon @ Purdue</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">WHEELHOUSE</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#4caf50">WIN</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#4caf50;font-size:.85rem">+0.74u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">+6.8%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-08</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">Arizona Wildcats ML</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Fresno St Bulldogs @ Arizona Wildcats</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">WHEELHOUSE</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#4caf50">WIN</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#4caf50;font-size:.85rem">+1.11u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">+26.5%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-08</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">Nebraska ML</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Michigan St Spartans @ Nebraska</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">WHEELHOUSE</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#4caf50">WIN</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#4caf50;font-size:.85rem">+0.74u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">+18.4%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-08</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">Cincinnati ML</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">UC San Diego @ Cincinnati</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">WHEELHOUSE</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#4caf50">WIN</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#4caf50;font-size:.85rem">+0.53u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">+14.1%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-08</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">Tennessee ML</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Wright St Raiders @ Tennessee</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">WHEELHOUSE</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#DC143C">LOSS</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#DC143C;font-size:.85rem">-2.00u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">+9.8%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-07</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">Southern California ML</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Illinois @ Southern California</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">WHEELHOUSE</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#4caf50">WIN</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#4caf50;font-size:.85rem">+0.47u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">+9.1%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-07</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">UNDER 14.0</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">UCLA Bruins @ Ohio State</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">OU</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#DC143C">LOSS</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#DC143C;font-size:.85rem">-1.00u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">0.0%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-07</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">OVER 14.0</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Virginia Tech @ Georgia Tech</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">OU</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#4caf50">WIN</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#4caf50;font-size:.85rem">+0.91u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">0.0%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-07</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">Florida Int'l Golden Panthers ML</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Florida Atlantic Owls @ Florida Int'l Golden Panthers</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">FILTHY</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#4caf50">WIN</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#4caf50;font-size:.85rem">+0.83u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">+61.2%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-07</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">Jacksonville Dolphins ML</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">UNC Wilmington Seahawks @ Jacksonville Dolphins</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">FILTHY</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#DC143C">LOSS</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#DC143C;font-size:.85rem">-1.50u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">+43.8%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-07</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">Louisiana-Lafayette ML</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Louisiana-Lafayette @ Dallas Baptist</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">FILTHY</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#4caf50">WIN</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#4caf50;font-size:.85rem">+1.95u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">+59.2%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-07</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">Duke ML</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Notre Dame Fighting Irish @ Duke</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">FILTHY</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#4caf50">WIN</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#4caf50;font-size:.85rem">+1.25u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">+33.7%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-07</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">Tennessee ML</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Wright St Raiders @ Tennessee</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">FILTHY</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#4caf50">WIN</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#4caf50;font-size:.85rem">+0.26u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">+6.3%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-07</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">Troy Trojans ML</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Maryland @ Troy Trojans</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">WHEELHOUSE</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#DC143C">LOSS</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#DC143C;font-size:.85rem">-2.00u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">+26.6%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-07</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">Utah Utes ML</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Grand Canyon @ Utah Utes</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">WHEELHOUSE</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#4caf50">WIN</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#4caf50;font-size:.85rem">+1.30u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">+51.6%</td>
+</tr>
+<tr style="border-bottom:1px solid #1e1e1e">
+  <td style="padding:.4rem .7rem;color:#888;font-size:.8rem">2026-03-07</td>
+  <td style="padding:.4rem .7rem;font-size:.85rem">Oregon St Beavers ML</td>
+  <td style="padding:.4rem .7rem;font-size:.78rem;color:#666">Xavier @ Oregon St Beavers</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-size:.78rem;color:#888">WHEELHOUSE</td>
+  <td style="padding:.4rem .7rem;text-align:center;font-weight:700;color:#4caf50">WIN</td>
+  <td style="padding:.4rem .7rem;text-align:right;color:#4caf50;font-size:.85rem">+0.38u</td>
+  <td style="padding:.4rem .7rem;text-align:right;font-size:.78rem;color:#666">+12.7%</td>
+</tr></tbody>
+      </table>
+    </div>
+  </details>
+
+  <p style="color:#444;font-size:.75rem;margin-top:.5rem">
+    Picks publicly tracked since March 6, 2026 &nbsp;·&nbsp;
+    Units: Wheelhouse=2.0u · Filthy=1.5u · O/U=1.0u &nbsp;·&nbsp;
+    <a href="methodology.html">Full Methodology</a> &nbsp;·&nbsp;
+    Updated Mar 12, 2026 08:34 AM ET
+  </p>
+
+</div>
+
+<footer>
+  <div style="margin-bottom:.5rem">
+    <a href="index.html">Today's Picks</a> &nbsp;·&nbsp;
+    <a href="performance.html">Performance</a> &nbsp;·&nbsp;
+    <a href="methodology.html">Methodology</a>
+  </div>
+  <div style="color:var(--accent);font-weight:600">Every play. Every edge. EyeBlackIQ.</div>
+</footer>
+
+<script>
+// ── Cumulative P&L Line Chart ────────────────────────────────────────────────
+const pnlCtx = document.getElementById('pnlChart').getContext('2d');
+const pnlLabels = ["2026-03-07", "2026-03-07", "2026-03-07", "2026-03-07", "2026-03-07", "2026-03-07", "2026-03-07", "2026-03-07", "2026-03-07", "2026-03-07", "2026-03-07", "2026-03-08", "2026-03-08", "2026-03-08", "2026-03-08", "2026-03-08", "2026-03-08", "2026-03-08", "2026-03-09", "2026-03-10", "2026-03-10", "2026-03-10", "2026-03-10", "2026-03-10", "2026-03-10", "2026-03-10", "2026-03-10", "2026-03-10", "2026-03-10", "2026-03-10", "2026-03-10", "2026-03-10", "2026-03-11", "2026-03-11", "2026-03-11", "2026-03-11", "2026-03-11", "2026-03-11"];
+const pnlData   = [0.38, 1.68, -0.32, -0.06, 1.19, 3.14, 1.64, 2.47, 3.38, 2.38, 2.85, 0.85, 1.38, 2.12, 3.23, 3.97, 1.97, 2.64, 3.25, 3.86, 4.47, 5.15, 6.01, 4.51, 5.58, 4.08, 4.99, 3.99, 2.99, 3.9, 4.81, 5.72, 6.08, 6.71, 5.21, 3.71, 2.21, 3.12];
+const pnlColor  = pnlData.length ? (pnlData[pnlData.length-1] >= 0 ? '#4caf50' : '#DC143C') : '#4caf50';
+new Chart(pnlCtx, {
+  type: 'line',
+  data: {
+    labels: pnlLabels,
+    datasets: [{
+      label: 'Cumulative P&L (units)',
+      data: pnlData,
+      borderColor: pnlColor,
+      backgroundColor: pnlColor + '22',
+      fill: true,
+      tension: 0.3,
+      pointRadius: 3,
+      pointBackgroundColor: pnlColor,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { labels: { color: '#aaa', font: { size: 11 } } },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y >= 0 ? '+' : ''}${ctx.parsed.y.toFixed(2)}u` } }
+    },
+    scales: {
+      x: { ticks: { color:'#666', maxRotation:45, font:{size:10} }, grid:{ color:'#1e1e1e' } },
+      y: { ticks: { color:'#888', font:{size:10},
+                callback: v => (v >= 0 ? '+' : '') + v.toFixed(1) + 'u' },
+           grid: { color:'#1e1e1e' },
+           zero: true }
+    }
+  }
+});
+
+// ── Tier Bar Chart ───────────────────────────────────────────────────────────
+const tierCtx    = document.getElementById('tierChart').getContext('2d');
+const tierLabels = ["WHEELHOUSE", "FILTHY", "O/U"];
+const tierWins   = [13, 7, 6];
+const tierLosses = [3, 6, 3];
+new Chart(tierCtx, {
+  type: 'bar',
+  data: {
+    labels: tierLabels,
+    datasets: [
+      { label: 'Wins',   data: tierWins,   backgroundColor: '#4caf5099', borderColor: '#4caf50', borderWidth:1 },
+      { label: 'Losses', data: tierLosses, backgroundColor: '#DC143C99', borderColor: '#DC143C', borderWidth:1 }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { labels: { color:'#aaa', font:{size:11} } } },
+    scales: {
+      x: { ticks: { color:'#aaa' }, grid:{ color:'#1e1e1e' } },
+      y: { ticks: { color:'#888', stepSize:1 }, grid:{ color:'#1e1e1e' } }
+    }
+  }
+});
+</script>
+</body>
+</html>
