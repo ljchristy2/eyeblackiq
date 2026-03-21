@@ -58,9 +58,12 @@
 .loss-analysis-row { display: none; }
 .loss-analysis-row.open { display: table-row; }
 .loss-analysis-cell {
-  background: rgba(220,20,60,0.06); border-top: none !important;
-  padding: 8px 16px 12px 32px !important; font-size: 12px; color: #bbb;
+  background: rgba(220,20,60,0.04); border-top: none !important;
+  padding: 10px 16px 14px 32px !important; font-size: 12px; color: #bbb;
 }
+.la-structured { display: flex; flex-direction: column; gap: 3px; }
+.la-score { font-size: 13px; color: #e0ddd8; margin-bottom: 2px; }
+.la-score strong { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: 0.5px; }
 .la-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700;
   letter-spacing: 2px; text-transform: uppercase; color: var(--red,#DC143C); margin-right: 8px; }
 .la-miss    { color: var(--red,#DC143C); }
@@ -168,6 +171,16 @@ tr[style*="opacity:0.5"] td { color: var(--text-dim,#888) !important; }
     <div class="record-stat">
       <span class="stat-label">STREAK</span>
       <span class="stat-value" id="bar-streak">—</span>
+    </div>
+    <div class="record-divider"></div>
+    <div class="record-stat">
+      <span class="stat-label">DAY STREAK</span>
+      <span class="stat-value" id="bar-day-streak">—</span>
+    </div>
+    <div class="record-divider"></div>
+    <div class="record-stat">
+      <span class="stat-label">POD STREAK</span>
+      <span class="stat-value" id="bar-pod-streak">—</span>
     </div>
   </div>
 </div>
@@ -390,7 +403,8 @@ function isPickem(pick) {
 }
 function isProp(pick) {
   if (!pick || typeof pick === 'number' || typeof pick === 'string') return false;
-  return (pick.pick_source || 'SPORTSBOOK') === 'SPORTSBOOK';
+  const bt = (pick.bet_type || pick.market || '').toUpperCase().trim();
+  return bt.endsWith('_PROP') || bt === 'PROP' || bt === 'PROPS';
 }
 
 function oddsStr(odds) {
@@ -420,14 +434,49 @@ function toggleLossAnalysis(id) {
 }
 
 function buildLossAnalysis(p) {
-  if (p.loss_analysis) return p.loss_analysis;
   const parts = [];
-  if (p.notes) {
-    const note = (p.notes || '').split('  Conf=')[0];
-    if (note) parts.push(note);
+
+  // 1. Box score / final result — primary data
+  if (p.actual_val) {
+    parts.push(`<div class="la-score"><span class="la-label">FINAL</span><strong>${p.actual_val}</strong></div>`);
   }
-  if (p.actual_val) parts.push(`Actual: ${p.actual_val}`);
-  return parts.length ? parts.join('  ·  ') : 'No additional data.';
+
+  // 2. Miss margin (from pre-computed loss_analysis field)
+  if (p.loss_analysis) {
+    const missMatch = p.loss_analysis.match(/Miss margin: ([^·]+)/);
+    if (missMatch) {
+      parts.push(`<div style="margin-top:4px;"><span class="la-label">MISS</span><span class="la-miss">${missMatch[1].trim()}</span></div>`);
+    }
+  }
+
+  // 3. Variance verdict badge
+  if (p.variance_verdict) {
+    const vv = p.variance_verdict;
+    const vColor = vv === 'VARIANCE' ? '#4A90D9' : vv === 'REVIEW' ? '#DC143C' : '#888';
+    const vIcon  = vv === 'VARIANCE' ? '🎲' : vv === 'REVIEW' ? '🔍' : '❓';
+    const vBg    = vv === 'VARIANCE' ? 'rgba(74,144,217,0.15)' : vv === 'REVIEW' ? 'rgba(220,20,60,0.15)' : 'rgba(100,100,100,0.12)';
+    parts.push(`<div style="margin-top:6px;">
+      <span style="font-size:10px;font-weight:700;letter-spacing:1px;padding:2px 8px;border-radius:3px;background:${vBg};color:${vColor};font-family:'Barlow Condensed',sans-serif;">${vIcon} ${vv}</span>
+      <span style="font-size:11px;color:#666;margin-left:6px;">${p.variance_note || ''}</span>
+    </div>`);
+  }
+
+  // 4. CLV line
+  if (p.clv != null) {
+    const cp = p.clv * 100;
+    const cc = cp >= 0 ? '#4A90D9' : '#DC143C';
+    parts.push(`<span style="font-size:11px;color:${cc};margin-right:12px;">CLV ${cp >= 0 ? '+' : ''}${cp.toFixed(1)}%</span>`);
+  }
+
+  // 5. Context notes — skip raw scraper notes (source=FanDuel style)
+  const note = (p.notes || '').split('|')[0].split('  Conf=')[0].trim();
+  if (note && !note.startsWith('source=') && note.length > 4 && note.length < 250) {
+    parts.push(`<div style="margin-top:5px;color:#666;font-size:11px;line-height:1.5;">📝 ${note}</div>`);
+  }
+
+  return parts.length
+    ? `<div class="la-structured">${parts.join('')}</div>`
+    : '<span style="color:#555;font-size:12px;">No additional data available.</span>';
 }
 
 // ── Render Daily ──────────────────────────────────────────────────────────────
@@ -555,37 +604,50 @@ function renderPOD(pods) {
 }
 
 // ── Render POD sport badges ───────────────────────────────────────────────────
+let _sportStreaks = {};
+let _typeStreaks  = {};
+let _recordData  = {};
+
 function renderPodBadges(pods) {
   const sports = ['NCAA_BASEBALL', 'MLB', 'NHL', 'SOCCER', 'CRICKET', 'HANDBALL'];
-  const sportLabels = { NCAA_BASEBALL: 'NCAA', MLB: 'MLB', NHL: 'NHL', SOCCER: 'Soccer', CRICKET: '🏏 Cricket', HANDBALL: '🤾 Handball' };
+  const sportLabels = { NCAA_BASEBALL: '⚾ NCAA', MLB: '⚾ MLB', NHL: '🏒 NHL', SOCCER: '⚽ Soccer', CRICKET: '🏏 Cricket', HANDBALL: '🤾 Handball' };
   const badges = sports.map(s => {
     const sp = pods.filter(p => (p.sport || '').toUpperCase() === s);
     const w  = sp.filter(p => p.result === 'WIN').length;
     const l  = sp.filter(p => p.result === 'LOSS').length;
-    const net = sp.reduce((a, p) => a + (p.net_units || p.units_net || 0), 0);
+    if (w === 0 && l === 0) return '';
+    const net   = sp.reduce((a, p) => a + (p.net_units || p.units_net || 0), 0);
     const units = sp.reduce((a, p) => a + (p.units || 0), 0);
-    const roi = units > 0 ? (net / units * 100).toFixed(1) : '0.0';
+    const roi   = units > 0 ? (net / units * 100).toFixed(1) : '0.0';
+    const streak = _sportStreaks[s] || '—';
+    const strColor = streak.startsWith('W') ? '#2ecc71' : streak.startsWith('L') ? '#DC143C' : '#888';
     return `<div class="pod-sport-badge">
-      <div class="psb-sport">📌 ${sportLabels[s] || s}</div>
+      <div class="psb-sport">${sportLabels[s] || s}</div>
       <div class="psb-record">${w}W-${l}L</div>
-      <div class="psb-roi">${roi >= 0 ? '+' : ''}${roi}% ROI</div>
+      <div class="psb-roi">${Number(roi) >= 0 ? '+' : ''}${roi}% ROI</div>
+      <div class="psb-streak" style="color:${strColor};">Streak: ${streak}</div>
     </div>`;
-  });
+  }).filter(Boolean);
   const el = document.getElementById('pod-badges');
-  if (el) el.innerHTML = badges.join('') || '<div style="color:var(--text-dim);font-size:13px;padding:12px;">No POD picks graded yet.</div>';
+  if (el) el.innerHTML = badges.length ? badges.join('') : '<div style="color:var(--text-dim);font-size:13px;padding:12px;">No POD picks graded yet.</div>';
 }
 
 // ── Record bar ────────────────────────────────────────────────────────────────
 async function loadRecord() {
   try {
     const r = await fetch('data/record.json?t=' + Date.now()).then(res => res.json());
+    _recordData   = r;
+    _sportStreaks  = r.sport_streaks  || {};
+    _typeStreaks   = r.type_streaks   || {};
     const net = r.net_units || 0;
     const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-    set('bar-record', `${r.wins||0}-${r.losses||0}-${r.pushes||0}`);
-    set('bar-units',  `${net >= 0 ? '+' : ''}${net.toFixed(1)}u`);
-    set('bar-roi',    `${(r.roi||0) >= 0 ? '+' : ''}${(r.roi||0).toFixed(1)}%`);
-    set('bar-pod',    `${r.pod_wins||0}-${r.pod_losses||0}`);
-    set('bar-streak', r.streak || '—');
+    set('bar-record',     `${r.wins||0}-${r.losses||0}-${r.pushes||0}`);
+    set('bar-units',      `${net >= 0 ? '+' : ''}${net.toFixed(1)}u`);
+    set('bar-roi',        `${(r.roi||0) >= 0 ? '+' : ''}${(r.roi||0).toFixed(1)}%`);
+    set('bar-pod',        `${r.pod_wins||0}-${r.pod_losses||0}`);
+    set('bar-streak',     r.streak     || '—');
+    set('bar-day-streak', r.day_streak || '—');
+    set('bar-pod-streak', r.pod_streak || '—');
     const unitsEl = document.getElementById('bar-units');
     const roiEl   = document.getElementById('bar-roi');
     if (unitsEl) unitsEl.className = 'stat-value ' + (net >= 0 ? 'positive' : 'negative');

@@ -2,6 +2,29 @@
 
 ---
 
+## [v0.8.0] — 2026-03-21
+**Task ID:** CC-UI-20260321-005 / CC-PIPELINE-20260321-001
+**Triggered by:** Master chat — Sprint: BYU DB fix, export improvements, enrich_results ETL, UI streak/grouping upgrades
+**Summary:** (1) Fixed signal id 100 (BYU @ WVU) — corrected from ML +1400 to SPREAD BYU +1.5 (mispriced ML). (2) export.py: added `bet_type`/`pick_source` to pod_summary; added game_time to ORDER BY for chronological sorting; added comprehensive streak computation to record (pod_streak, day_streak, sport_streaks, type_streaks); added variance_verdict/variance_note to LOSS records. (3) New `pipeline/enrich_results.py` — ESPN box score fetcher for NHL/MLB/NCAA_BASEBALL/Soccer; fuzzy team matching; writes actual_val to results table. (4) index.html: SPORT_ICONS map + sportIcon() helper; DAY STREAK and POD STREAK added to record bar; renderPicks() upgraded — tab-specific POD filtering, chronological sort, sport-grouped picks view, contextual empty states. (5) results.html: fixed isProp() bug (was using pick_source, now uses bet_type); upgraded buildLossAnalysis() with structured HTML — box score FINAL, miss margin, variance verdict badge, CLV line, context notes; per-sport streaks in renderPodBadges(); loadRecord() captures sport_streaks/type_streaks/pod_streak/day_streak; DAY STREAK + POD STREAK added to record bar; .la-structured/.la-score CSS added. (6) style.css: .sport-pick-group, .sport-pick-header, .sport-pick-count CSS added.
+
+**Files Modified:**
+- `pipeline/db/eyeblackiq.db` — signal id 100 updated (bet_type=SPREAD, side=BYU +1.5, odds=110)
+- `pipeline/export.py` — pod_summary adds bet_type/pick_source; ORDER BY adds game_time; export_record() adds pod_streak/day_streak/sport_streaks/type_streaks; export_results() adds variance_verdict/variance_note
+- `pipeline/enrich_results.py` — NEW FILE: ESPN box score enrichment ETL for results.actual_val
+- `docs/index.html` — SPORT_ICONS constant + sportIcon(); DAY STREAK + POD STREAK in record bar; updateRecordBar() updated; renderPicks() full rewrite (tab-POD filter, chrono sort, sport groups, contextual empties)
+- `docs/results.html` — isProp() bug fix; buildLossAnalysis() structured HTML rewrite; renderPodBadges() adds streaks + globals; loadRecord() captures new streak fields; record bar adds DAY/POD STREAK; .la-structured/.la-score CSS
+- `docs/style.css` — .sport-pick-group, .sport-pick-header, .sport-pick-count
+- `docs/data/record.json` — regenerated with sport_streaks, type_streaks, pod_streak, day_streak
+- `docs/data/today_slip.json` — regenerated with pod[].bet_type and pod[].pick_source
+
+**Schema Changes:** No
+**Backtest Impact:** Not required
+**Go-Live Parameter Changes:** No
+**Tests Passed:** Yes — export: 67 recommended, 1 flagged, 1 POD; record.json has sport_streaks/type_streaks/pod_streak/day_streak; signal 100 = SPREAD BYU +1.5 @110; enrich_results.py runs cleanly (0 missing rows in current window)
+**Pod Version:** UI v2.4.0 | Pipeline v0.8.0
+
+---
+
 ## [v0.7.0] — 2026-03-21
 **Task ID:** CC-NHL-20260321-002 / CC-UI-20260321-004
 **Triggered by:** Master chat — Props fix sprint (classification, SOG model upgrade, UI polish)

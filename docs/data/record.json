@@ -8,5 +8,18 @@
   "pod_wins": 3,
   "pod_losses": 0,
   "streak": "W7",
+  "pod_streak": "W3",
+  "day_streak": "\u2014",
+  "sport_streaks": {
+    "MLB": "W3",
+    "NCAA_BASEBALL": "W2",
+    "NHL": "W3",
+    "SOCCER": "W3"
+  },
+  "type_streaks": {
+    "ML": "W1",
+    "PROP": "W3",
+    "TOTAL": "W1"
+  },
   "last_updated": "2026-03-21"
 }

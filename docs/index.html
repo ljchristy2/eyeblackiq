@@ -62,6 +62,16 @@
       <span class="stat-label">STREAK</span>
       <span class="stat-value" id="bar-streak">—</span>
     </div>
+    <div class="record-divider"></div>
+    <div class="record-stat">
+      <span class="stat-label">DAY STREAK</span>
+      <span class="stat-value" id="bar-day-streak">—</span>
+    </div>
+    <div class="record-divider"></div>
+    <div class="record-stat">
+      <span class="stat-label">POD STREAK</span>
+      <span class="stat-value" id="bar-pod-streak">—</span>
+    </div>
   </div>
 </div>
 
@@ -213,7 +223,9 @@ function updateRecordBar(rec) {
   set('bar-units',  `${net >= 0 ? '+' : ''}${net.toFixed(1)}u`);
   set('bar-roi',    `${(rec.roi||0) >= 0 ? '+' : ''}${(rec.roi||0).toFixed(1)}%`);
   set('bar-pod',    `${rec.pod_wins||0}-${rec.pod_losses||0}`);
-  set('bar-streak', rec.streak || '—');
+  set('bar-streak',     rec.streak     || '—');
+  set('bar-day-streak', rec.day_streak || '—');
+  set('bar-pod-streak', rec.pod_streak || '—');
   const unitsEl = document.getElementById('bar-units');
   const roiEl   = document.getElementById('bar-roi');
   if (unitsEl) unitsEl.className = 'stat-value ' + (net >= 0 ? 'positive' : 'negative');
@@ -221,6 +233,10 @@ function updateRecordBar(rec) {
 }
 
 // ── Tier system ───────────────────────────────────────────────────────────────
+// ── Sport icons map ───────────────────────────────────────────────────────────
+const SPORT_ICONS = {NCAA:'⚾',NCAA_BASEBALL:'⚾',MLB:'⚾',NHL:'🏒',SOCCER:'⚽',CRICKET:'🏏',HANDBALL:'🤾'};
+function sportIcon(sport) { return SPORT_ICONS[(sport||'').toUpperCase()] || '📊'; }
+
 const TIER_CSS = {
   'FILTHY':'tier-red','SNIPE':'tier-red','UPPER 90':'tier-red','SCREAMER':'tier-red',
   'WHEELHOUSE':'tier-blue','SLOT MACHINE':'tier-blue','CHEEKY':'tier-blue','FAST BREAK':'tier-blue',
@@ -496,18 +512,60 @@ function renderPicks() {
   const todayPicks    = allRec.filter(p => !p.signal_date || p.signal_date === today);
   const upcomingPicks = allRec.filter(p => p.signal_date && p.signal_date > today);
 
-  // POD row — always show all pods
-  const podEl = document.getElementById('pod-row');
+  // Sort today's picks chronologically by game_time, then by edge
+  todayPicks.sort((a, b) => {
+    const ta = a.game_time || '23:59';
+    const tb = b.game_time || '23:59';
+    const tc = ta.localeCompare(tb);
+    return tc !== 0 ? tc : (b.edge_pct || 0) - (a.edge_pct || 0);
+  });
+
+  // ── POD row: filter by active tab type + sport ─────────────────────────────
+  const podEl    = document.getElementById('pod-row');
+  const podTitle = document.querySelector('.pods-section .section-title');
   if (podEl) {
-    const filtPods = filters.sport === 'ALL' ? pods : pods.filter(p => (p.sport||'').toUpperCase().includes(filters.sport));
+    let filtPods = [...pods];
+    // Sport filter
+    if (filters.sport !== 'ALL') {
+      filtPods = filtPods.filter(p => (p.sport||'').toUpperCase().includes(filters.sport));
+    }
+    // Tab-type filter: show only matching pod type
+    if (filters.type === 'PROPS') {
+      filtPods = filtPods.filter(p => {
+        const bt = (p.bet_type || '').toUpperCase();
+        return bt.endsWith('_PROP') || bt === 'PROP' || bt === 'PROPS';
+      });
+      if (podTitle) podTitle.innerHTML = '⚡ Props POD <span class="pod-badge">PLAYER PROPS</span>';
+    } else if (filters.type === 'PICKEM') {
+      filtPods = filtPods.filter(p => (p.pick_source || 'SPORTSBOOK') === 'PICKEM');
+      if (podTitle) podTitle.innerHTML = 'Pick\'em POD <span class="pod-badge">PICK\'EM</span>';
+    } else {
+      if (podTitle) podTitle.innerHTML = '📌 Pick of the Day <span class="pod-badge">HIGH ●●●</span>';
+    }
+
+    let podEmpty;
+    if (filters.type === 'PROPS')  podEmpty = 'No Props PODs today — Props POD appears when a player prop hits HIGH confidence + WHEELHOUSE';
+    else if (filters.type === 'PICKEM') podEmpty = '🚧 Coming Soon — Pick\'em PODs will appear once the Pick\'em scraper is live';
+    else podEmpty = 'No POD picks today — requires HIGH confidence + WHEELHOUSE or better';
+
     podEl.innerHTML = filtPods.length
       ? filtPods.map(podCard).join('')
-      : '<p class="empty-state">No POD picks today — requires HIGH confidence + WHEELHOUSE or better</p>';
+      : `<p class="empty-state">${podEmpty}</p>`;
   }
 
-  // Picks grid — apply all filters to TODAY's picks only
-  // When Props or Pick'ems type filter active, include T3/Scout in main grid
-  // Otherwise T3 picks go to On Radar section
+  // ── Section title updates per active tab ──────────────────────────────────
+  const sectionTitle = document.querySelector('.picks-section .section-title');
+  if (sectionTitle) {
+    if (filters.type === 'PROPS') {
+      sectionTitle.innerHTML = `Today's Props <span class="count-badge" id="rec-count">0</span>`;
+    } else if (filters.type === 'PICKEM') {
+      sectionTitle.innerHTML = `Today's Pick\'em Plays <span class="count-badge" id="rec-count">0</span>`;
+    } else {
+      sectionTitle.innerHTML = `Today's Picks <span class="count-badge" id="rec-count">0</span>`;
+    }
+  }
+
+  // ── Picks grid: filtered, sorted, sport-grouped ───────────────────────────
   const showAllTiers = (filters.type === 'PROPS' || filters.type === 'PICKEM');
   const mainPicks  = todayPicks.filter(p => passesFilter(p) && (showAllTiers || tierLevel(p.tier) !== 'T3'));
   const scoutPicks = todayPicks.filter(p => passesFilter(p) && !showAllTiers && tierLevel(p.tier) === 'T3');
@@ -515,40 +573,56 @@ function renderPicks() {
   const recEl = document.getElementById('picks-grid');
   if (recEl) {
     if (filters.type === 'PROPS' && mainPicks.length) {
-      // Game-grouped prop cards
+      // Group props by game, sorted chronologically
       const byGame = {};
-      mainPicks.forEach(p => {
-        const g = p.game || 'Other';
-        if (!byGame[g]) byGame[g] = [];
-        byGame[g].push(p);
-      });
-      const html = Object.entries(byGame).map(([game, picks]) =>
+      mainPicks.forEach(p => { const g = p.game || 'Other'; (byGame[g] = byGame[g] || []).push(p); });
+      recEl.innerHTML = Object.entries(byGame).map(([game, picks]) =>
         `<div class="prop-game-group">
-           <div class="prop-game-header">🏒 ${game}</div>
+           <div class="prop-game-header">${sportIcon('NHL')} ${game}</div>
            <div class="prop-game-picks">${picks.map(propCard).join('')}</div>
          </div>`
       ).join('');
-      recEl.innerHTML = html;
-    } else if (filters.type === 'PROPS' && !mainPicks.length) {
-      const subLabel = filters.prop_sub && filters.prop_sub !== 'ALL' ? ` (${filters.prop_sub})` : '';
-      recEl.innerHTML = `<p class="empty-state">No player props${subLabel} today matching current filters. Run <code>scrapers/scrape_fanduel_props.py</code> to populate NHL props.</p>`;
+    } else if (filters.type === 'PROPS') {
+      const sub = filters.prop_sub && filters.prop_sub !== 'ALL' ? ` (${filters.prop_sub})` : '';
+      const sportStr = filters.sport !== 'ALL' ? ` for ${filters.sport}` : '';
+      recEl.innerHTML = `<p class="empty-state">No player props${sub}${sportStr} today. Run <code>scrapers/scrape_fanduel_props.py</code> to populate NHL props.</p>`;
     } else if (filters.type === 'PICKEM') {
       recEl.innerHTML = '<p class="empty-state">🚧 Coming Soon — Pick\'em plays from PrizePicks, Underdog, and ESPN Pick\'em will appear here once the scraper is live.</p>';
     } else if (mainPicks.length) {
-      recEl.innerHTML = mainPicks.map(pickCard).join('');
+      // Group by sport with inline sport-divider headers (chronological within sport)
+      if (filters.sport === 'ALL') {
+        // Multi-sport view: show sport group headers
+        const bySport = {};
+        mainPicks.forEach(p => { const s = p.sport || 'OTHER'; (bySport[s] = bySport[s] || []).push(p); });
+        const sportOrder = Object.keys(bySport);
+        recEl.innerHTML = sportOrder.map(sp => {
+          const spPicks = bySport[sp];
+          return `<div class="sport-pick-group">
+            <div class="sport-pick-header">${sportIcon(sp)} ${sp.replace('_',' ')} <span class="sport-pick-count">${spPicks.length}</span></div>
+            ${spPicks.map(pickCard).join('')}
+          </div>`;
+        }).join('');
+      } else {
+        // Single sport: just sorted cards
+        recEl.innerHTML = mainPicks.map(pickCard).join('');
+      }
     } else {
-      recEl.innerHTML = '<p class="empty-state">No plays meeting threshold for current filters.</p>';
+      // Empty state with context
+      const sportMsg = filters.sport !== 'ALL' ? `${filters.sport} ` : '';
+      const typeMsg  = filters.type ? ` (${filters.type})` : '';
+      recEl.innerHTML = `<p class="empty-state">No ${sportMsg}picks${typeMsg} meeting threshold today. Check <em>On Radar</em> below for T3 Scout signals.</p>`;
     }
   }
 
   const countEl = document.getElementById('rec-count');
   if (countEl) countEl.textContent = mainPicks.length;
 
-  // Upcoming section — future-dated picks (filtered by sport if active)
+  // ── Upcoming section ──────────────────────────────────────────────────────
   const upcomingSection = document.getElementById('upcoming-section');
   const upcomingGrid    = document.getElementById('upcoming-grid');
   const upcomingCount   = document.getElementById('upcoming-count');
-  const filtUpcoming = upcomingPicks.filter(p => matchesSportFilter(p));
+  const filtUpcoming    = upcomingPicks.filter(p => matchesSportFilter(p))
+                                       .sort((a,b) => (a.signal_date||'').localeCompare(b.signal_date||''));
   if (filtUpcoming.length > 0) {
     upcomingSection.style.display = 'block';
     if (upcomingCount) upcomingCount.textContent = filtUpcoming.length;
@@ -557,7 +631,7 @@ function renderPicks() {
     if (upcomingSection) upcomingSection.style.display = 'none';
   }
 
-  // On Radar — Scout (T3) picks — auto-expand if there are items
+  // ── On Radar (T3 Scout) ───────────────────────────────────────────────────
   const radarSection = document.getElementById('radar-section');
   const radarList    = document.getElementById('radar-list');
   const radarCount   = document.getElementById('radar-count');
@@ -565,8 +639,7 @@ function renderPicks() {
     radarSection.style.display = 'block';
     if (radarCount) radarCount.textContent = scoutPicks.length;
     if (radarList)  radarList.innerHTML = scoutPicks.map(radarCard).join('');
-    // Auto-expand On Radar if not yet interacted with
-    if (!radarOpen && scoutPicks.length > 0) {
+    if (!radarOpen) {
       radarOpen = true;
       if (radarList) radarList.style.display = 'flex';
       const btn = document.getElementById('radar-btn');
@@ -576,7 +649,7 @@ function renderPicks() {
     if (radarSection) radarSection.style.display = 'none';
   }
 
-  // Full Market View — flagged picks (below threshold or above cap)
+  // ── Full Market View ──────────────────────────────────────────────────────
   const fmvSection = document.getElementById('fmv-section');
   const fmvList    = document.getElementById('fmv-list');
   const fmvCount   = document.getElementById('fmv-count');

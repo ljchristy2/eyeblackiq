@@ -495,3 +495,20 @@ footer { background: var(--surface); border-top: 1px solid var(--border); paddin
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 12px;
 }
+
+/* ─── SPORT PICK GROUPS (v0.8.0) ─────────────── */
+.sport-pick-group {
+  width: 100%;
+  margin-bottom: 20px;
+}
+.sport-pick-header {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: #555;
+  padding: 5px 0 10px; border-bottom: 1px solid #1c1c1c;
+  margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+}
+.sport-pick-count {
+  font-size: 10px; background: #1c1c1c; color: #555;
+  padding: 1px 6px; border-radius: 10px;
+}

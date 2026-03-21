@@ -20,7 +20,9 @@
       "is_pod": 0,
       "pod_sport": "NCAA_BASEBALL",
       "edge": 0.206,
-      "tier_color": "#4A90D9"
+      "tier_color": "#4A90D9",
+      "variance_verdict": null,
+      "variance_note": null
     },
     {
       "signal_date": "2026-03-20",
@@ -42,7 +44,9 @@
       "is_pod": null,
       "pod_sport": null,
       "edge": null,
-      "tier_color": "#555555"
+      "tier_color": "#555555",
+      "variance_verdict": null,
+      "variance_note": null
     },
     {
       "signal_date": "2026-03-20",
@@ -64,7 +68,9 @@
       "is_pod": null,
       "pod_sport": null,
       "edge": null,
-      "tier_color": "#555555"
+      "tier_color": "#555555",
+      "variance_verdict": null,
+      "variance_note": null
     },
     {
       "signal_date": "2026-03-20",
@@ -86,7 +92,9 @@
       "is_pod": null,
       "pod_sport": null,
       "edge": null,
-      "tier_color": "#555555"
+      "tier_color": "#555555",
+      "variance_verdict": null,
+      "variance_note": null
     },
     {
       "signal_date": "2026-03-20",
@@ -108,7 +116,9 @@
       "is_pod": 1,
       "pod_sport": "NHL",
       "edge": 0.185,
-      "tier_color": "#DC143C"
+      "tier_color": "#DC143C",
+      "variance_verdict": null,
+      "variance_note": null
     },
     {
       "signal_date": "2026-03-20",
@@ -130,7 +140,9 @@
       "is_pod": 0,
       "pod_sport": "NHL",
       "edge": 0.077,
-      "tier_color": "#4A90D9"
+      "tier_color": "#4A90D9",
+      "variance_verdict": null,
+      "variance_note": null
     },
     {
       "signal_date": "2026-03-20",
@@ -152,7 +164,9 @@
       "is_pod": 0,
       "pod_sport": "NHL",
       "edge": 0.078,
-      "tier_color": "#4A90D9"
+      "tier_color": "#4A90D9",
+      "variance_verdict": null,
+      "variance_note": null
     },
     {
       "signal_date": "2026-03-20",
@@ -175,7 +189,9 @@
       "pod_sport": "NHL",
       "edge": 0.091,
       "tier_color": "#4A90D9",
-      "loss_analysis": "BUF 5-0 SJS. Dahlin 1G 1A."
+      "loss_analysis": "BUF 5-0 SJS. Dahlin 1G 1A.",
+      "variance_verdict": "UNCLEAR",
+      "variance_note": "Moderate edge, no CLV data \u2014 cannot fully assess"
     },
     {
       "signal_date": "2026-03-20",
@@ -198,7 +214,9 @@
       "pod_sport": "NHL",
       "edge": 0.068,
       "tier_color": "#4A90D9",
-      "loss_analysis": "CAR 4-3 OT TOR. Rielly 0 pts, -1."
+      "loss_analysis": "CAR 4-3 OT TOR. Rielly 0 pts, -1.",
+      "variance_verdict": "UNCLEAR",
+      "variance_note": "Moderate edge, no CLV data \u2014 cannot fully assess"
     },
     {
       "signal_date": "2026-03-20",
@@ -221,7 +239,9 @@
       "pod_sport": "NHL",
       "edge": 0.077,
       "tier_color": "#4A90D9",
-      "loss_analysis": "Utah 4-0 VGK. Theodore pointless."
+      "loss_analysis": "Utah 4-0 VGK. Theodore pointless.",
+      "variance_verdict": "UNCLEAR",
+      "variance_note": "Moderate edge, no CLV data \u2014 cannot fully assess"
     },
     {
       "signal_date": "2026-03-20",
@@ -244,7 +264,9 @@
       "pod_sport": "NHL",
       "edge": 0.096,
       "tier_color": "#4A90D9",
-      "loss_analysis": "TBL 6-2 VAN. Hedman quiet despite blowout."
+      "loss_analysis": "TBL 6-2 VAN. Hedman quiet despite blowout.",
+      "variance_verdict": "UNCLEAR",
+      "variance_note": "Moderate edge, no CLV data \u2014 cannot fully assess"
     },
     {
       "signal_date": "2026-03-20",
@@ -266,7 +288,9 @@
       "is_pod": 0,
       "pod_sport": "NHL",
       "edge": 0.118,
-      "tier_color": "#DC143C"
+      "tier_color": "#DC143C",
+      "variance_verdict": null,
+      "variance_note": null
     },
     {
       "signal_date": "2026-03-20",
@@ -289,7 +313,9 @@
       "pod_sport": "NHL",
       "edge": 0.122,
       "tier_color": "#DC143C",
-      "loss_analysis": "PHI 4-3 LAK SO. Laferriere 3 SOG \u2014 went over."
+      "loss_analysis": "PHI 4-3 LAK SO. Laferriere 3 SOG \u2014 went over.",
+      "variance_verdict": "VARIANCE",
+      "variance_note": "High-edge signal (12.2%) \u2014 statistically expected to lose sometimes"
     },
     {
       "signal_date": "2026-03-20",
@@ -311,7 +337,9 @@
       "is_pod": 0,
       "pod_sport": "NHL",
       "edge": 0.12,
-      "tier_color": "#DC143C"
+      "tier_color": "#DC143C",
+      "variance_verdict": null,
+      "variance_note": null
     },
     {
       "signal_date": "2026-03-20",
@@ -334,7 +362,9 @@
       "pod_sport": "NHL",
       "edge": 0.075,
       "tier_color": "#4A90D9",
-      "loss_analysis": "CAR 4-3 OT TOR. Rielly quiet night (0 pts, 1 SOG)."
+      "loss_analysis": "CAR 4-3 OT TOR. Rielly quiet night (0 pts, 1 SOG).",
+      "variance_verdict": "UNCLEAR",
+      "variance_note": "Moderate edge, no CLV data \u2014 cannot fully assess"
     },
     {
       "signal_date": "2026-03-20",
@@ -357,7 +387,9 @@
       "pod_sport": "NHL",
       "edge": 0.078,
       "tier_color": "#4A90D9",
-      "loss_analysis": "Utah 4-0 VGK. Andersson only 1 SOG."
+      "loss_analysis": "Utah 4-0 VGK. Andersson only 1 SOG.",
+      "variance_verdict": "UNCLEAR",
+      "variance_note": "Moderate edge, no CLV data \u2014 cannot fully assess"
     },
     {
       "signal_date": "2026-03-20",
@@ -379,7 +411,9 @@
       "is_pod": 0,
       "pod_sport": "NHL",
       "edge": 0.09,
-      "tier_color": "#4A90D9"
+      "tier_color": "#4A90D9",
+      "variance_verdict": null,
+      "variance_note": null
     },
     {
       "signal_date": "2026-03-20",
@@ -401,7 +435,9 @@
       "is_pod": 1,
       "pod_sport": "MLB",
       "edge": 0.344,
-      "tier_color": "#DC143C"
+      "tier_color": "#DC143C",
+      "variance_verdict": null,
+      "variance_note": null
     },
     {
       "signal_date": "2026-03-20",
@@ -423,7 +459,9 @@
       "is_pod": 0,
       "pod_sport": "MLB",
       "edge": 0.056,
-      "tier_color": "#4A90D9"
+      "tier_color": "#4A90D9",
+      "variance_verdict": null,
+      "variance_note": null
     },
     {
       "signal_date": "2026-03-20",
@@ -445,7 +483,9 @@
       "is_pod": 0,
       "pod_sport": "MLB",
       "edge": 0.115,
-      "tier_color": "#DC143C"
+      "tier_color": "#DC143C",
+      "variance_verdict": null,
+      "variance_note": null
     },
     {
       "signal_date": "2026-03-20",
@@ -467,7 +507,9 @@
       "is_pod": 1,
       "pod_sport": "NCAA_BASEBALL",
       "edge": 0.0,
-      "tier_color": "#B8960C"
+      "tier_color": "#B8960C",
+      "variance_verdict": null,
+      "variance_note": null
     },
     {
       "signal_date": "2026-03-20",
@@ -490,7 +532,9 @@
       "pod_sport": "NCAA_BASEBALL",
       "edge": 0.0,
       "tier_color": "#4A90D9",
-      "loss_analysis": "Opening ML: BYU +300 / WVU -425 | Spread: BYU +2.5 | RL_ALT triggered (>+250). Model had BYU 13.6% vs market 25% implied \u2014 spread was the correct vehicle. WVU won 12-10: BYU +2.5 WOULD HAVE COVERED. Validates RL_ALT rule."
+      "loss_analysis": "Opening ML: BYU +300 / WVU -425 | Spread: BYU +2.5 | RL_ALT triggered (>+250). Model had BYU 13.6% vs market 25% implied \u2014 spread was the correct vehicle. WVU won 12-10: BYU +2.5 WOULD HAVE COVERED. Validates RL_ALT rule.",
+      "variance_verdict": "REVIEW",
+      "variance_note": "Low edge, no CLV data \u2014 worth reviewing"
     }
   ],
   "daily_summaries": [

@@ -104,7 +104,7 @@ def export_today_slip(date_str: str) -> dict:
                    OR (signal_date > ? AND created_at >= datetime(?, '-7 days')
                        AND id NOT IN (SELECT signal_id FROM results WHERE result NOT IN ('PENDING','VOID')))
                )
-               ORDER BY signal_date ASC, is_pod DESC, units DESC, edge DESC""",
+               ORDER BY signal_date ASC, is_pod DESC, game_time ASC NULLS LAST, units DESC, edge DESC""",
             (date_str, date_str, date_str)
         )
         rows = [dict(r) for r in cur.fetchall()]
@@ -137,19 +137,21 @@ def export_today_slip(date_str: str) -> dict:
             # Build POD summary from is_pod=1 signals
             if is_pod:
                 pod_summary.append({
-                    "sport":      row["sport"],
-                    "pick":       row["side"],
-                    "odds":       row["odds"],
-                    "tier":       row["tier"],
-                    "units":      row["units"],
-                    "game":       row["game"],
-                    "game_time":  row["game_time"],
-                    "model_prob": row["model_prob"],
-                    "edge":       row["edge_pct"],
-                    "ev":         row["ev"],
-                    "conf_label": conf_label,
-                    "conf_sym":   conf_sym,
-                    "result":     "PENDING",
+                    "sport":       row["sport"],
+                    "pick":        row["side"],
+                    "odds":        row["odds"],
+                    "tier":        row["tier"],
+                    "units":       row["units"],
+                    "game":        row["game"],
+                    "game_time":   row["game_time"],
+                    "model_prob":  row["model_prob"],
+                    "edge":        row["edge_pct"],
+                    "ev":          row["ev"],
+                    "conf_label":  conf_label,
+                    "conf_sym":    conf_sym,
+                    "result":      "PENDING",
+                    "bet_type":    row.get("bet_type") or "",
+                    "pick_source": row.get("pick_source") or "SPORTSBOOK",
                 })
         else:
             if status == "flagged_high":
@@ -239,17 +241,92 @@ def export_record() -> dict:
     else:
         streak_str = f"{'W' if streak_type == 'WIN' else 'L'}{streak_n}"
 
+    def _build_streak(rows):
+        """Build current streak string from a list of 'WIN'/'LOSS' strings (newest first)."""
+        n, t = 0, None
+        for r in rows:
+            if t is None: t = r
+            if r == t: n += 1
+            else: break
+        if n == 0: return "—"
+        return f"{'W' if t == 'WIN' else 'L'}{n}"
+
+    # POD streak
+    with get_conn() as conn:
+        cur = conn.execute(
+            """SELECT r.result FROM results r
+               JOIN signals s ON s.id = r.signal_id
+               WHERE s.is_pod = 1 AND r.result IN ('WIN','LOSS')
+               ORDER BY r.signal_date DESC, r.id DESC LIMIT 20"""
+        )
+        pod_streak_rows = [r[0] for r in cur.fetchall()]
+    pod_streak = _build_streak(pod_streak_rows)
+
+    # Winning/losing day streak
+    with get_conn() as conn:
+        cur = conn.execute(
+            """SELECT signal_date,
+                      SUM(CASE WHEN result='WIN'  THEN 1 ELSE 0 END) as w,
+                      SUM(CASE WHEN result='LOSS' THEN 1 ELSE 0 END) as l
+               FROM results WHERE result IN ('WIN','LOSS')
+               GROUP BY signal_date ORDER BY signal_date DESC LIMIT 14"""
+        )
+        day_rows_raw = cur.fetchall()
+
+    day_streak = "—"
+    if day_rows_raw:
+        ds_type = None
+        ds_n = 0
+        for _, dw, dl in day_rows_raw:
+            dtype = "WIN" if (dw or 0) > 0 and (dl or 0) == 0 else "LOSS" if (dl or 0) > 0 and (dw or 0) == 0 else "MIX"
+            if dtype == "MIX":
+                break
+            if ds_type is None: ds_type = dtype
+            if dtype == ds_type: ds_n += 1
+            else: break
+        if ds_n > 0:
+            day_streak = f"{'W' if ds_type == 'WIN' else 'L'}{ds_n}"
+
+    # Per-sport streaks
+    with get_conn() as conn:
+        cur = conn.execute(
+            """SELECT sport, result FROM results
+               WHERE result IN ('WIN','LOSS')
+               ORDER BY sport, signal_date DESC, id DESC"""
+        )
+        sport_results_raw = {}
+        for sp, res in cur.fetchall():
+            sport_results_raw.setdefault(sp, []).append(res)
+    sport_streaks = {sp: _build_streak(rows) for sp, rows in sport_results_raw.items()}
+
+    # Per-bet-type streaks
+    with get_conn() as conn:
+        cur = conn.execute(
+            """SELECT s.bet_type, r.result FROM results r
+               JOIN signals s ON s.id = r.signal_id
+               WHERE r.result IN ('WIN','LOSS') AND s.bet_type IS NOT NULL
+               ORDER BY s.bet_type, r.signal_date DESC, r.id DESC"""
+        )
+        type_results_raw = {}
+        for bt, res in cur.fetchall():
+            type_results_raw.setdefault(bt, []).append(res)
+    type_streaks = {bt: _build_streak(rows) for bt, rows in type_results_raw.items()}
+
     return {
-        "wins":        wins or 0,
-        "losses":      losses or 0,
-        "pushes":      pushes or 0,
-        "net_units":   net_units,
-        "roi":         roi,
-        "clv_pct":     clv_pct,
-        "pod_wins":    pod_wins,
-        "pod_losses":  pod_losses,
-        "streak":      streak_str,
-        "last_updated": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+        "wins":          wins or 0,
+        "losses":        losses or 0,
+        "pushes":        pushes or 0,
+        "net_units":     net_units,
+        "roi":           roi,
+        "clv_pct":       clv_pct,
+        "pod_wins":      pod_wins,
+        "pod_losses":    pod_losses,
+        "streak":        streak_str,
+        "pod_streak":    pod_streak,
+        "day_streak":    day_streak,
+        "sport_streaks": sport_streaks,
+        "type_streaks":  type_streaks,
+        "last_updated":  datetime.now(timezone.utc).strftime("%Y-%m-%d"),
     }
 
 
@@ -330,6 +407,31 @@ def export_results(limit: int = 200) -> list:
                 if note:
                     parts.append(note)
             r["loss_analysis"] = "  ·  ".join(parts) if parts else None
+
+        # Variance verdict for all results (WIN gets None, LOSS gets assessment)
+        if r.get("result") in ("LOSS", "L"):
+            edge_val = r.get("edge") or 0
+            clv = r.get("clv")
+            if clv is not None:
+                if clv > 0:
+                    r["variance_verdict"] = "VARIANCE"
+                    r["variance_note"]    = f"Beat closing line (CLV +{clv*100:.1f}%) — good process, variance loss"
+                else:
+                    r["variance_verdict"] = "REVIEW"
+                    r["variance_note"]    = f"Line moved against model (CLV {clv*100:.1f}%) — review process"
+            elif edge_val >= 0.10:
+                r["variance_verdict"] = "VARIANCE"
+                r["variance_note"]    = f"High-edge signal ({edge_val*100:.1f}%) — statistically expected to lose sometimes"
+            elif edge_val >= 0.05:
+                r["variance_verdict"] = "UNCLEAR"
+                r["variance_note"]    = "Moderate edge, no CLV data — cannot fully assess"
+            else:
+                r["variance_verdict"] = "REVIEW"
+                r["variance_note"]    = "Low edge, no CLV data — worth reviewing"
+        else:
+            r["variance_verdict"] = None
+            r["variance_note"]    = None
+
     return rows
 
 
