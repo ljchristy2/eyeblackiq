@@ -1,9 +1,9 @@
 {
   "date": "2026-03-21",
-  "generated": "2026-03-21T18:17:01.530380+00:00",
+  "generated": "2026-03-21T19:30:19.333555+00:00",
   "recommended": [
     {
-      "id": 94,
+      "id": 103,
       "sport": "NCAA_BASEBALL",
       "game": "Texas @ Auburn",
       "game_time": "6:00 PM ET",
@@ -34,7 +34,7 @@
       "rl_alt": false
     },
     {
-      "id": 89,
+      "id": 98,
       "sport": "NCAA_BASEBALL",
       "game": "Maryland @ UCLA",
       "game_time": "5:00 PM ET",
@@ -65,7 +65,7 @@
       "rl_alt": false
     },
     {
-      "id": 93,
+      "id": 102,
       "sport": "NCAA_BASEBALL",
       "game": "Florida @ Alabama",
       "game_time": "3:00 PM ET",
@@ -96,7 +96,7 @@
       "rl_alt": false
     },
     {
-      "id": 90,
+      "id": 99,
       "sport": "NCAA_BASEBALL",
       "game": "Washington @ USC",
       "game_time": "10:00 PM ET",
@@ -127,7 +127,7 @@
       "rl_alt": false
     },
     {
-      "id": 91,
+      "id": 100,
       "sport": "NCAA_BASEBALL",
       "game": "BYU @ West Virginia",
       "game_time": "1:00 PM ET",
@@ -158,7 +158,7 @@
       "rl_alt": false
     },
     {
-      "id": 88,
+      "id": 97,
       "sport": "NCAA_BASEBALL",
       "game": "Minnesota @ Indiana",
       "game_time": "2:00 PM ET",
@@ -189,7 +189,7 @@
       "rl_alt": false
     },
     {
-      "id": 92,
+      "id": 101,
       "sport": "NCAA_BASEBALL",
       "game": "Oklahoma @ LSU",
       "game_time": "3:00 PM ET",
@@ -220,7 +220,7 @@
       "rl_alt": false
     },
     {
-      "id": 95,
+      "id": 96,
       "sport": "SOCCER",
       "game": "Real Madrid vs Atletico Madrid",
       "game_time": "2026-03-22 3:00 PM ET",
