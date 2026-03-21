@@ -317,6 +317,57 @@
         <li>Props: OddsAPI (MLB Ks, NHL SOG)</li>
       </ul>
     </div>
+    <div class="method-card">
+      <div class="method-card-title">API Sports Data (New)</div>
+      <p>EyeBlackIQ now integrates API Sports for expanded sport coverage. API Sports provides
+         official fixture data, results, and odds across cricket, handball, soccer, MLB, and NHL.</p>
+      <ul>
+        <li>Cricket: IPL, ICC T20 World Cup, ICC ODI World Cup fixtures and scores</li>
+        <li>Handball: EHF Champions League, German Bundesliga Handball schedules and results</li>
+        <li>Soccer: Supplemental to football-data.co.uk for live fixture tracking</li>
+        <li>MLB / NHL: Supplemental odds data when official APIs lack market lines</li>
+      </ul>
+      <p>Base URLs: <code>v1.cricket.api-sports.io</code> / <code>v1.handball.api-sports.io</code></p>
+    </div>
+  </div>
+
+  <!-- PICK'EM MARKETS -->
+  <div class="section-divider"><h2>Pick'em Markets</h2></div>
+  <div class="method-grid">
+    <div class="method-card" style="grid-column: span 2;">
+      <div class="method-card-title">Near-50/50 Games — How They're Flagged and Why</div>
+      <p>Picks with odds between <code>-120</code> and <code>+120</code> are labeled <strong>Pick'em</strong>
+         throughout the site. These represent games where the market sees a near-50/50 split in win probability.</p>
+      <p>Pick'ems are not inherently more or less valuable than other picks. However, they serve a distinct
+         informational purpose:</p>
+      <ul>
+        <li>When our model also shows roughly equal probability, the pick'em badge is a calibration check —
+            both model and market agree, which increases confidence in the no-vig probability estimate</li>
+        <li>When our model significantly disagrees with a pick'em line, the edge reading may be inflated
+            relative to higher-priced plays — the badge surfaces this for manual review</li>
+        <li>Pick'ems are tracked separately in the Results page to allow independent calibration analysis</li>
+      </ul>
+      <p>You can filter for Pick'em picks on both the Today and Results pages using the Pick'ems filter button.</p>
+    </div>
+  </div>
+
+  <!-- FULL MARKET VIEW -->
+  <div class="section-divider"><h2>Full Market View</h2></div>
+  <div class="method-grid">
+    <div class="method-card" style="grid-column: span 2;">
+      <div class="method-card-title">All Games Analyzed — Not Just Recommended Picks</div>
+      <p>The <strong>Full Market View</strong> section (visible at the bottom of the Today page) shows every
+         game the model processed that day — including games where edge fell below the 2% threshold or other
+         gates were not met. These are informational outputs only with no unit sizing.</p>
+      <p>Why this matters:</p>
+      <ul>
+        <li>Transparency — you can see what the model passed on and why, not just what it liked</li>
+        <li>False positives — occasionally a model outputs a low-confidence edge that doesn't survive
+            full gate filtering; the Full Market View shows these without dressing them as recommendations</li>
+        <li>Long-term tracking — all Full Market View picks are graded in the Results page under the
+            same methodology as recommended picks, allowing unbiased record-keeping across the full model output</li>
+      </ul>
+    </div>
   </div>
 
 </main>

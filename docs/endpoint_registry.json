@@ -163,5 +163,113 @@
     "sample_fields": [],
     "reliability_score": 3,
     "notes": "GATE FAILED: No free handball API with historical odds. EHF requires commercial license."
+  },
+  {
+    "sport": "CRICKET",
+    "category": "B",
+    "source": "API Sports — Cricket Fixtures",
+    "url_template": "https://v1.cricket.api-sports.io/fixtures?season={YYYY}&league={id}&date={YYYY-MM-DD}",
+    "auth_required": true,
+    "auth_header": "X-Auth-Token: {APISPORTS_KEY}",
+    "free_tier_limit": "100 requests/day (free plan)",
+    "sample_fields": ["response[].fixture.id","response[].fixture.date","response[].fixture.status.short","response[].teams.home.name","response[].teams.away.name","response[].scores.home.innings","response[].scores.away.innings"],
+    "reliability_score": 7,
+    "notes": "Official API Sports cricket endpoint. Covers IPL (league=1), ICC T20 World Cup (league=9), ICC ODI World Cup (league=10). Requires APISPORTS_KEY in .env. Auth via X-Auth-Token or x-rapidapi-key header."
+  },
+  {
+    "sport": "CRICKET",
+    "category": "B",
+    "source": "API Sports — Cricket Leagues",
+    "url_template": "https://v1.cricket.api-sports.io/leagues",
+    "auth_required": true,
+    "auth_header": "X-Auth-Token: {APISPORTS_KEY}",
+    "free_tier_limit": "100 requests/day (free plan)",
+    "sample_fields": ["response[].league.id","response[].league.name","response[].country.name","response[].seasons[].year"],
+    "reliability_score": 7,
+    "notes": "Returns all available cricket leagues and competitions with IDs. Use to discover league_ids for fixture queries."
+  },
+  {
+    "sport": "CRICKET",
+    "category": "B",
+    "source": "API Sports — Cricket Odds",
+    "url_template": "https://v1.cricket.api-sports.io/odds?fixture={fixture_id}",
+    "auth_required": true,
+    "auth_header": "X-Auth-Token: {APISPORTS_KEY}",
+    "free_tier_limit": "100 requests/day (free plan)",
+    "sample_fields": ["response[].bookmakers[].id","response[].bookmakers[].name","response[].bookmakers[].bets[].name","response[].bookmakers[].bets[].values[].odd"],
+    "reliability_score": 6,
+    "notes": "Pre-game odds by fixture ID. Availability depends on plan tier. Verify coverage before relying on for backtesting."
+  },
+  {
+    "sport": "HANDBALL",
+    "category": "B",
+    "source": "API Sports — Handball Fixtures",
+    "url_template": "https://v1.handball.api-sports.io/games?season={YYYY}&league={id}&date={YYYY-MM-DD}",
+    "auth_required": true,
+    "auth_header": "X-Auth-Token: {APISPORTS_KEY}",
+    "free_tier_limit": "100 requests/day (free plan)",
+    "sample_fields": ["response[].id","response[].date","response[].status.short","response[].teams.home.name","response[].teams.away.name","response[].scores.home","response[].scores.away"],
+    "reliability_score": 7,
+    "notes": "Official API Sports handball endpoint. Covers EHF Champions League, German Bundesliga Handball, and others. Requires APISPORTS_KEY. Use /leagues endpoint to discover league IDs."
+  },
+  {
+    "sport": "HANDBALL",
+    "category": "B",
+    "source": "API Sports — Handball Leagues",
+    "url_template": "https://v1.handball.api-sports.io/leagues",
+    "auth_required": true,
+    "auth_header": "X-Auth-Token: {APISPORTS_KEY}",
+    "free_tier_limit": "100 requests/day (free plan)",
+    "sample_fields": ["response[].id","response[].name","response[].country.name","response[].seasons[].season"],
+    "reliability_score": 7,
+    "notes": "Returns all available handball leagues with IDs for fixture queries."
+  },
+  {
+    "sport": "HANDBALL",
+    "category": "B",
+    "source": "API Sports — Handball Odds",
+    "url_template": "https://v1.handball.api-sports.io/odds?game={game_id}",
+    "auth_required": true,
+    "auth_header": "X-Auth-Token: {APISPORTS_KEY}",
+    "free_tier_limit": "100 requests/day (free plan)",
+    "sample_fields": ["response[].bookmakers[].name","response[].bookmakers[].bets[].name","response[].bookmakers[].bets[].values[].odd"],
+    "reliability_score": 6,
+    "notes": "Pre-game odds by game ID. Availability depends on plan tier."
+  },
+  {
+    "sport": "SOCCER",
+    "category": "B",
+    "source": "API Sports — Soccer Fixtures",
+    "url_template": "https://v3.football.api-sports.io/fixtures?date={YYYY-MM-DD}&league={id}&season={YYYY}",
+    "auth_required": true,
+    "auth_header": "X-Auth-Token: {APISPORTS_KEY}",
+    "free_tier_limit": "100 requests/day (free plan)",
+    "sample_fields": ["response[].fixture.id","response[].fixture.date","response[].teams.home.name","response[].teams.away.name","response[].goals.home","response[].goals.away","response[].fixture.status.short"],
+    "reliability_score": 8,
+    "notes": "API Sports soccer (football) endpoint. Covers EPL, La Liga, Bundesliga, Serie A, Ligue 1. Primary URL: v3.football.api-sports.io. Supplemental to football-data.co.uk CSVs."
+  },
+  {
+    "sport": "MLB",
+    "category": "B",
+    "source": "API Sports — Baseball Fixtures",
+    "url_template": "https://v1.baseball.api-sports.io/games?date={YYYY-MM-DD}&league={id}&season={YYYY}",
+    "auth_required": true,
+    "auth_header": "X-Auth-Token: {APISPORTS_KEY}",
+    "free_tier_limit": "100 requests/day (free plan)",
+    "sample_fields": ["response[].id","response[].date","response[].teams.home.name","response[].teams.away.name","response[].scores.home.total","response[].scores.away.total","response[].status.short"],
+    "reliability_score": 7,
+    "notes": "API Sports MLB endpoint. MLB = league 1. Supplemental to official MLB Stats API (which is preferred for MLB). Useful for odds when combined with odds endpoint."
+  },
+  {
+    "sport": "NHL",
+    "category": "B",
+    "source": "API Sports — Hockey Fixtures",
+    "url_template": "https://v1.hockey.api-sports.io/games?date={YYYY-MM-DD}&league={id}&season={YYYY}",
+    "auth_required": true,
+    "auth_header": "X-Auth-Token: {APISPORTS_KEY}",
+    "free_tier_limit": "100 requests/day (free plan)",
+    "sample_fields": ["response[].id","response[].date","response[].teams.home.name","response[].teams.away.name","response[].scores.home","response[].scores.away","response[].status.short"],
+    "reliability_score": 7,
+    "notes": "API Sports hockey endpoint. NHL = league 57. Supplemental to official NHL API (which is preferred). Useful for odds data."
   }
 ]

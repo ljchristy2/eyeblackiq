@@ -21,8 +21,99 @@
 .psb-roi    { font-size: 12px; color: #888; margin-top: 2px; }
 .psb-streak { font-size: 11px; color: var(--gold,#B8960C); margin-top: 2px; font-weight: 700; }
 
-/* ── Chart stub ─────────────────────────────── */
-.chart-area { background: #111; border: 1px solid #1c1c1c; border-radius: 8px; padding: 24px; margin-bottom: 24px; text-align: center; color: #444; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; letter-spacing: 1px; }
+/* ── Filter bar for results ─────────────────── */
+.results-filter-bar {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;
+  padding: 12px 16px; background: var(--panel,#141414);
+  border: 1px solid var(--border,#1C1C1C); border-radius: 6px;
+}
+.results-filter-bar .filter-label {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 10px;
+  letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim,#888);
+  align-self: center; margin-right: 4px;
+}
+.rf-btn {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase; padding: 5px 12px;
+  background: transparent; border: 1px solid var(--border,#1C1C1C);
+  color: var(--text-dim,#888); cursor: pointer; transition: all 0.15s;
+}
+.rf-btn:hover { color: var(--text,#F0EDE8); border-color: #444; }
+.rf-btn.active { color: var(--text,#F0EDE8); border-color: var(--red,#DC143C); background: rgba(220,20,60,0.08); }
+
+/* ── Tier badge in table ────────────────────── */
+.tier-pill {
+  display: inline-block; padding: 2px 8px; border-radius: 3px;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 10px;
+  font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  color: #000; white-space: nowrap;
+}
+
+/* ── Result badges ──────────────────────────── */
+.result-w { color: #2ecc71; font-weight: 700; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; }
+.result-l { color: var(--red,#DC143C); font-weight: 700; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; }
+.result-p { color: #888; font-weight: 700; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; }
+
+/* ── Loss analysis row ──────────────────────── */
+.loss-analysis-row { display: none; }
+.loss-analysis-row.open { display: table-row; }
+.loss-analysis-cell {
+  background: rgba(220,20,60,0.06); border-top: none !important;
+  padding: 8px 16px 12px 32px !important; font-size: 12px; color: #bbb;
+}
+.la-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase; color: var(--red,#DC143C); margin-right: 8px; }
+.la-miss    { color: var(--red,#DC143C); }
+.la-context { color: #888; }
+.loss-toggle {
+  display: inline-block; font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--red,#DC143C); cursor: pointer; margin-left: 8px; opacity: 0.7;
+}
+.loss-toggle:hover { opacity: 1; }
+
+/* ── Net units ──────────────────────────────── */
+.net-positive { color: #2ecc71; font-weight: 700; }
+.net-negative { color: var(--red,#DC143C); font-weight: 700; }
+
+/* ── POD indicator ──────────────────────────── */
+.pod-indicator {
+  display: inline-block; font-size: 9px; padding: 1px 5px;
+  background: var(--gold,#B8960C); color: #000; font-weight: 700;
+  border-radius: 2px; margin-left: 4px; vertical-align: middle;
+}
+
+/* ── Prop badge ─────────────────────────────── */
+.prop-badge {
+  display: inline-block; font-size: 9px; padding: 1px 5px;
+  background: #4A90D9; color: #000; font-weight: 700;
+  border-radius: 2px; margin-left: 4px; vertical-align: middle;
+}
+
+/* ── Pick'em badge ──────────────────────────── */
+.pickem-badge {
+  display: inline-block; font-size: 9px; padding: 1px 5px;
+  background: #888; color: #fff; font-weight: 700;
+  border-radius: 2px; margin-left: 4px; vertical-align: middle;
+}
+
+/* ── Tab improvements ───────────────────────── */
+.tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border,#1C1C1C); margin-bottom: 20px; }
+.tab-btn {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase; padding: 10px 20px;
+  background: transparent; border: none; border-bottom: 2px solid transparent;
+  color: var(--text-dim,#888); cursor: pointer; margin-bottom: -2px; transition: all 0.15s;
+}
+.tab-btn:hover { color: var(--text,#F0EDE8); }
+.tab-btn.active { color: var(--red,#DC143C); border-bottom-color: var(--red,#DC143C); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ── Results header ─────────────────────────── */
+.results-header { margin-bottom: 20px; }
+.results-title { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 2px; color: var(--text,#F0EDE8); line-height: 1; }
+.results-sub { font-size: 13px; color: var(--text-dim,#888); margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -86,7 +177,7 @@
   <!-- POD SECTION -->
   <div class="section-divider" style="margin-bottom:16px;"><h2 style="border:none;padding:0;">📌 POD Record — Pick of the Day</h2></div>
   <div class="pod-sport-badges" id="pod-badges">
-    <div class="chart-area" style="min-width:200px;">Loading POD record...</div>
+    <div style="color:var(--text-dim);font-size:13px;padding:12px;">Loading POD record...</div>
   </div>
 
   <!-- TABS -->
@@ -98,12 +189,27 @@
 
   <!-- TAB 1: DAILY RESULTS -->
   <div class="tab-content active" id="tab-daily">
+
+    <!-- Filter bar -->
+    <div class="results-filter-bar">
+      <span class="filter-label">SPORT</span>
+      <button class="rf-btn active" data-rf="sport" data-rv="ALL">All</button>
+      <button class="rf-btn" data-rf="sport" data-rv="NCAA">⚾ NCAA</button>
+      <button class="rf-btn" data-rf="sport" data-rv="MLB">⚾ MLB</button>
+      <button class="rf-btn" data-rf="sport" data-rv="NHL">🏒 NHL</button>
+      <button class="rf-btn" data-rf="sport" data-rv="SOCCER">⚽ Soccer</button>
+      <span class="filter-label" style="margin-left:8px;">TYPE</span>
+      <button class="rf-btn" data-rf="type" data-rv="PROPS">⚡ Props</button>
+      <button class="rf-btn" data-rf="type" data-rv="PICKEM">Pick'ems</button>
+      <button class="rf-btn" data-rf="type" data-rv="POD">📌 PODs</button>
+    </div>
+
     <div style="overflow-x:auto;">
       <table class="results-table">
         <thead>
           <tr>
             <th>Date</th><th>Sport</th><th>Tier</th><th>Pick</th>
-            <th>Line</th><th>Units</th><th>Result</th><th>Score</th><th>Net</th>
+            <th>Line</th><th>Units</th><th>Result</th><th>Actual</th><th>Net</th>
           </tr>
         </thead>
         <tbody id="daily-tbody">
@@ -137,11 +243,11 @@
         <thead>
           <tr>
             <th>Date</th><th>Sport</th><th>Pick</th>
-            <th>Line</th><th>Units</th><th>Result</th><th>Net</th>
+            <th>Line</th><th>Units</th><th>Result</th><th>Actual</th><th>Net</th>
           </tr>
         </thead>
         <tbody id="pod-tbody">
-          <tr><td colspan="7" style="color:var(--text-dim);text-align:center;padding:32px;">Loading POD record...</td></tr>
+          <tr><td colspan="8" style="color:var(--text-dim);text-align:center;padding:32px;">Loading POD record...</td></tr>
         </tbody>
       </table>
     </div>
@@ -169,27 +275,70 @@
 </footer>
 
 <script>
+// ── Tab switching ─────────────────────────────────────────────────────────────
 function switchTab(tab) {
-  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
     b.classList.toggle('active', ['daily','running','pod'][i] === tab);
   });
-  document.querySelectorAll('.tab-content').forEach((c,i) => {
-    c.classList.toggle('active', ['tab-daily','tab-running','tab-pod'][i] === 'tab-'+tab);
+  ['tab-daily','tab-running','tab-pod'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('active', id === 'tab-' + tab);
   });
 }
 
+// ── Filter state ──────────────────────────────────────────────────────────────
+const rFilters = { sport: 'ALL', type: null };
+let allPicks = [];
+
+// ── Filter buttons ────────────────────────────────────────────────────────────
+document.querySelectorAll('.rf-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const rf = btn.dataset.rf;
+    const rv = btn.dataset.rv;
+    if (rf === 'type') {
+      const isActive = btn.classList.contains('active');
+      document.querySelectorAll('.rf-btn[data-rf="type"]').forEach(b => b.classList.remove('active'));
+      if (!isActive) { btn.classList.add('active'); rFilters.type = rv; }
+      else { rFilters.type = null; }
+    } else {
+      document.querySelectorAll(`.rf-btn[data-rf="${rf}"]`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      rFilters[rf] = rv;
+    }
+    renderDaily(allPicks);
+  });
+});
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
 function netStr(n) {
+  if (n == null) return '—';
   const s = (n >= 0 ? '+' : '') + Number(n).toFixed(2) + 'u';
   return `<span class="${n >= 0 ? 'net-positive' : 'net-negative'}">${s}</span>`;
 }
 
 function resultBadge(r) {
   if (!r) return '—';
-  const up = (r||'').toUpperCase();
+  const up = (r || '').toUpperCase();
   if (up === 'WIN'  || up === 'W') return '<span class="result-w">✓ W</span>';
   if (up === 'LOSS' || up === 'L') return '<span class="result-l">✗ L</span>';
   if (up === 'PUSH' || up === 'P') return '<span class="result-p">→ P</span>';
+  if (up === 'PENDING')            return '<span style="color:#888;font-size:12px;">Pending</span>';
   return r;
+}
+
+function isPickem(odds) {
+  if (odds == null) return false;
+  const o = Number(odds);
+  return o >= -120 && o <= 120;
+}
+
+function isProp(market) {
+  return (market || '').toUpperCase() === 'PROPS';
+}
+
+function oddsStr(odds) {
+  if (odds == null) return '—';
+  return odds > 0 ? `+${odds}` : `${odds}`;
 }
 
 let _laOpenId = null;
@@ -203,151 +352,177 @@ function toggleLossAnalysis(id) {
     const prevBtn = document.getElementById('la-btn-' + _laOpenId);
     if (prevBtn) prevBtn.textContent = '▼ Analysis';
   }
-  if (!isOpen) { row.classList.add('open'); const btn = document.getElementById('la-btn-'+id); if(btn) btn.textContent='▲ Close'; _laOpenId=id; }
-  else { _laOpenId=null; }
+  if (!isOpen) {
+    row.classList.add('open');
+    const btn = document.getElementById('la-btn-' + id);
+    if (btn) btn.textContent = '▲ Close';
+    _laOpenId = id;
+  } else {
+    _laOpenId = null;
+  }
 }
 
 function buildLossAnalysis(p) {
   if (p.loss_analysis) return p.loss_analysis;
   const parts = [];
-  if (p.actual_val != null && p.line != null) {
-    const miss = parseFloat(p.actual_val) - parseFloat(p.line);
-    if (!isNaN(miss)) {
-      const dir = miss > 0 ? `over by ${Math.abs(miss).toFixed(1)}` : `short by ${Math.abs(miss).toFixed(1)}`;
-      parts.push(`<span class="la-miss">Miss: ${dir}</span>`);
-    }
+  if (p.notes) {
+    const note = (p.notes || '').split('  Conf=')[0];
+    if (note) parts.push(note);
   }
-  if (p.score)   parts.push(`<span class="la-context">Final: ${p.score}</span>`);
-  if (p.clv != null) parts.push(`<span class="la-context">CLV: ${p.clv > 0 ? '+' : ''}${(p.clv*100).toFixed(1)}%</span>`);
-  if (p.notes)   parts.push(`<span class="la-context">${p.notes}</span>`);
+  if (p.actual_val) parts.push(`Actual: ${p.actual_val}`);
   return parts.length ? parts.join('  ·  ') : 'No additional data.';
 }
 
+// ── Render Daily ──────────────────────────────────────────────────────────────
 function renderDaily(picks) {
-  if (!picks.length) {
-    document.getElementById('daily-tbody').innerHTML = '<tr><td colspan="9" style="color:var(--text-dim);text-align:center;padding:32px;">No results posted yet.</td></tr>';
+  const filtered = picks.filter(p => {
+    if (rFilters.sport !== 'ALL' && !(p.sport || '').toUpperCase().includes(rFilters.sport)) return false;
+    if (rFilters.type === 'PROPS'  && !isProp(p.market)) return false;
+    if (rFilters.type === 'PICKEM' && !isPickem(p.odds)) return false;
+    if (rFilters.type === 'POD'    && !p.is_pod) return false;
+    return true;
+  });
+
+  if (!filtered.length) {
+    document.getElementById('daily-tbody').innerHTML =
+      '<tr><td colspan="9" style="color:var(--text-dim);text-align:center;padding:32px;">No results match current filters.</td></tr>';
     return;
   }
-  document.getElementById('daily-tbody').innerHTML = [...picks].reverse().map((p, i) => {
-    const isLoss = (p.result||'').toUpperCase().startsWith('L');
-    const res = isLoss
-      ? `✗ L <span class="loss-toggle" id="la-btn-${i}" onclick="toggleLossAnalysis(${i})">▼ Analysis</span>`
+
+  document.getElementById('daily-tbody').innerHTML = filtered.map((p, i) => {
+    const isLoss    = (p.result || '').toUpperCase().startsWith('L');
+    const tier      = p.tier || '—';
+    const tcolor    = p.tier_color || '#555555';
+    const propBadge = isProp(p.market) ? '<span class="prop-badge">⚡ PROP</span>' : '';
+    const pickemBadge = isPickem(p.odds) ? '<span class="pickem-badge">PICK\'EM</span>' : '';
+    const podBadge  = p.is_pod ? '<span class="pod-indicator">📌 POD</span>' : '';
+    const resCell   = isLoss
+      ? `<span class="result-l">✗ L</span> <span class="loss-toggle" id="la-btn-${i}" onclick="toggleLossAnalysis(${i})">▼ Analysis</span>`
       : resultBadge(p.result);
     const main = `
     <tr>
-      <td>${p.date || p.signal_date || '—'}</td>
+      <td style="color:var(--text-dim);font-size:12px;white-space:nowrap;">${p.signal_date || '—'}</td>
       <td style="color:var(--text-dim);font-size:12px;">${p.sport || '—'}</td>
-      <td><span class="tier-badge">${p.tier || '—'}</span></td>
-      <td style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;">${p.pick || p.side || '—'}</td>
-      <td style="color:var(--blue);">${p.line || p.odds || '—'}</td>
-      <td>${p.units}u</td>
-      <td class="result-${isLoss?'l':''}">${res}</td>
-      <td style="color:var(--text-dim);font-size:13px;">${p.score || '—'}</td>
-      <td>${p.net_units != null ? netStr(p.net_units) : (p.units_net != null ? netStr(p.units_net) : '—')}</td>
+      <td><span class="tier-pill" style="background:${tcolor};">${tier}</span></td>
+      <td style="font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1px;">
+        ${p.side || p.pick || '—'}${propBadge}${pickemBadge}${podBadge}
+      </td>
+      <td style="color:var(--blue);font-family:'Barlow Condensed',sans-serif;">${oddsStr(p.odds)}</td>
+      <td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;">${p.units || 0}u</td>
+      <td>${resCell}</td>
+      <td style="color:var(--text-dim);font-size:12px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${p.actual_val || ''}">${p.actual_val || '—'}</td>
+      <td>${netStr(p.units_net != null ? p.units_net : p.net_units)}</td>
     </tr>`;
     const analysis = isLoss ? `
     <tr class="loss-analysis-row" id="la-${i}">
-      <td colspan="9" class="loss-analysis-cell"><span class="la-label">Loss Analysis</span>${buildLossAnalysis(p)}</td>
+      <td colspan="9" class="loss-analysis-cell">
+        <span class="la-label">Loss Analysis</span>
+        ${buildLossAnalysis(p)}
+      </td>
     </tr>` : '';
     return main + analysis;
   }).join('');
 }
 
+// ── Render Running Record ─────────────────────────────────────────────────────
 function renderRunning(summaries) {
-  if (!summaries.length) {
-    document.getElementById('running-tbody').innerHTML = '<tr><td colspan="7" style="color:var(--text-dim);text-align:center;padding:32px;">No daily summaries yet.</td></tr>';
+  if (!summaries || !summaries.length) {
+    document.getElementById('running-tbody').innerHTML =
+      '<tr><td colspan="7" style="color:var(--text-dim);text-align:center;padding:32px;">Building record — check back after more picks are graded.</td></tr>';
     return;
   }
   document.getElementById('running-tbody').innerHTML = [...summaries].reverse().map(s => `
     <tr>
-      <td>${s.date}</td>
-      <td>${s.day_w}-${s.day_l}-${s.day_p}</td>
+      <td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;">${s.date}</td>
+      <td style="color:var(--text-dim);">${s.day_w}-${s.day_l}-${s.day_p}</td>
       <td>${netStr(s.day_net)}</td>
       <td style="font-weight:700;">${s.season_w}-${s.season_l}-${s.season_p}</td>
       <td>${netStr(s.season_net)}</td>
-      <td class="${s.season_roi >= 0 ? 'net-positive' : 'net-negative'}">${(s.season_roi>=0?'+':'')}${s.season_roi.toFixed(1)}%</td>
-      <td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;">${s.streak || '—'}</td>
+      <td class="${s.season_roi >= 0 ? 'net-positive' : 'net-negative'}">${(s.season_roi >= 0 ? '+' : '')}${Number(s.season_roi).toFixed(1)}%</td>
+      <td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;color:var(--gold);">${s.streak || '—'}</td>
     </tr>
   `).join('');
 }
 
+// ── Render POD History ────────────────────────────────────────────────────────
 function renderPOD(pods) {
-  if (!pods.length) {
-    document.getElementById('pod-tbody').innerHTML = '<tr><td colspan="7" style="color:var(--text-dim);text-align:center;padding:32px;">No POD results yet.</td></tr>';
+  if (!pods || !pods.length) {
+    document.getElementById('pod-tbody').innerHTML =
+      '<tr><td colspan="8" style="color:var(--text-dim);text-align:center;padding:32px;">No POD results yet.</td></tr>';
     return;
   }
-  document.getElementById('pod-tbody').innerHTML = [...pods].reverse().map(p => `
+  document.getElementById('pod-tbody').innerHTML = pods.map(p => `
     <tr>
-      <td>${p.date}</td>
+      <td style="font-family:'Barlow Condensed',sans-serif;color:var(--text-dim);font-size:12px;">${p.date}</td>
       <td style="color:var(--gold);font-size:11px;font-weight:700;">${p.sport || '—'}</td>
       <td style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;">${p.pick}</td>
-      <td style="color:var(--blue);">${p.line || p.odds || '—'}</td>
-      <td>${p.units}u</td>
+      <td style="color:var(--blue);font-family:'Barlow Condensed',sans-serif;">${oddsStr(p.line || p.odds)}</td>
+      <td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;">${p.units}u</td>
       <td>${resultBadge(p.result)}</td>
-      <td>${p.net_units != null ? netStr(p.net_units) : '—'}</td>
+      <td style="color:var(--text-dim);font-size:12px;">${p.actual_val || '—'}</td>
+      <td>${netStr(p.net_units != null ? p.net_units : p.units_net)}</td>
     </tr>
   `).join('');
 }
 
-function renderPodBadges(podRecord) {
-  const sports = ['NCAA', 'MLB', 'NHL', 'SOCCER'];
+// ── Render POD sport badges ───────────────────────────────────────────────────
+function renderPodBadges(pods) {
+  const sports = ['NCAA_BASEBALL', 'MLB', 'NHL', 'SOCCER'];
+  const sportLabels = { NCAA_BASEBALL: 'NCAA', MLB: 'MLB', NHL: 'NHL', SOCCER: 'Soccer' };
   const badges = sports.map(s => {
-    const key = `${s}_POD`;
-    const d   = podRecord[key] || {w:0, l:0, p:0, roi_pct:0, streak_wl:{type:null,count:0}};
-    const streak = d.streak_wl && d.streak_wl.count > 0
-      ? `${d.streak_wl.type}${d.streak_wl.count}` : '—';
+    const sp = pods.filter(p => (p.sport || '').toUpperCase() === s);
+    const w  = sp.filter(p => p.result === 'WIN').length;
+    const l  = sp.filter(p => p.result === 'LOSS').length;
+    const net = sp.reduce((a, p) => a + (p.net_units || p.units_net || 0), 0);
+    const units = sp.reduce((a, p) => a + (p.units || 0), 0);
+    const roi = units > 0 ? (net / units * 100).toFixed(1) : '0.0';
     return `<div class="pod-sport-badge">
-      <div class="psb-sport">📌 ${s}</div>
-      <div class="psb-record">${d.w}W-${d.l}L</div>
-      <div class="psb-roi">${d.roi_pct >= 0 ? '+' : ''}${Number(d.roi_pct||0).toFixed(1)}% ROI</div>
-      <div class="psb-streak">${streak}</div>
+      <div class="psb-sport">📌 ${sportLabels[s] || s}</div>
+      <div class="psb-record">${w}W-${l}L</div>
+      <div class="psb-roi">${roi >= 0 ? '+' : ''}${roi}% ROI</div>
     </div>`;
   });
   const el = document.getElementById('pod-badges');
-  if (el) el.innerHTML = badges.join('');
+  if (el) el.innerHTML = badges.join('') || '<div style="color:var(--text-dim);font-size:13px;padding:12px;">No POD picks graded yet.</div>';
 }
 
+// ── Record bar ────────────────────────────────────────────────────────────────
 async function loadRecord() {
   try {
     const r = await fetch('data/record.json?t=' + Date.now()).then(res => res.json());
     const net = r.net_units || 0;
-    document.getElementById('bar-record').textContent = `${r.wins||0}-${r.losses||0}-${r.pushes||0}`;
-    document.getElementById('bar-units').textContent  = `${net>=0?'+':''}${net.toFixed(1)}u`;
-    document.getElementById('bar-units').className    = 'stat-value ' + (net>=0?'positive':'negative');
-    document.getElementById('bar-roi').textContent    = `${(r.roi||0)>=0?'+':''}${(r.roi||0).toFixed(1)}%`;
-    document.getElementById('bar-roi').className      = 'stat-value ' + ((r.roi||0)>=0?'positive':'negative');
-    document.getElementById('bar-pod').textContent    = `${r.pod_wins||0}-${r.pod_losses||0}`;
-    document.getElementById('bar-streak').textContent = r.streak || '—';
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    set('bar-record', `${r.wins||0}-${r.losses||0}-${r.pushes||0}`);
+    set('bar-units',  `${net >= 0 ? '+' : ''}${net.toFixed(1)}u`);
+    set('bar-roi',    `${(r.roi||0) >= 0 ? '+' : ''}${(r.roi||0).toFixed(1)}%`);
+    set('bar-pod',    `${r.pod_wins||0}-${r.pod_losses||0}`);
+    set('bar-streak', r.streak || '—');
+    const unitsEl = document.getElementById('bar-units');
+    const roiEl   = document.getElementById('bar-roi');
+    if (unitsEl) unitsEl.className = 'stat-value ' + (net >= 0 ? 'positive' : 'negative');
+    if (roiEl)   roiEl.className   = 'stat-value ' + ((r.roi||0) >= 0 ? 'positive' : 'negative');
   } catch(e) {}
 }
 
+// ── Main load ─────────────────────────────────────────────────────────────────
 async function loadResults() {
   try {
     const data = await fetch('data/results.json?t=' + Date.now()).then(r => r.json());
-    renderDaily(data.picks || []);
+    allPicks = data.picks || [];
+    renderDaily(allPicks);
     renderRunning(data.daily_summaries || []);
     renderPOD(data.pod_picks || []);
+    renderPodBadges(data.pod_picks || []);
   } catch(e) {
-    ['daily-tbody','running-tbody','pod-tbody'].forEach((id,i) => {
+    ['daily-tbody','running-tbody','pod-tbody'].forEach((id, i) => {
       const el = document.getElementById(id);
-      if (el) el.innerHTML = `<tr><td colspan="${i===1?7:i===2?7:9}" style="color:var(--text-dim);text-align:center;padding:32px;">No results posted yet. Check back after the first game day.</td></tr>`;
+      if (el) el.innerHTML = `<tr><td colspan="${i === 0 ? 9 : i === 1 ? 7 : 8}" style="color:var(--text-dim);text-align:center;padding:32px;">No results posted yet. Check back after the first game day.</td></tr>`;
     });
-  }
-}
-
-async function loadPodRecord() {
-  try {
-    const d = await fetch('../results/pod_record.json?t=' + Date.now()).then(r => r.json()).catch(() => ({}));
-    renderPodBadges(d);
-  } catch(e) {
-    const el = document.getElementById('pod-badges');
-    if (el) el.innerHTML = '<div class="chart-area">POD record loading...</div>';
   }
 }
 
 loadRecord();
 loadResults();
-loadPodRecord();
 </script>
 </body>
 </html>

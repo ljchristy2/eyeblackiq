@@ -1,12 +1,12 @@
 {
-  "wins": 14,
-  "losses": 8,
+  "wins": 17,
+  "losses": 11,
   "pushes": 0,
-  "net_units": 7.96,
-  "roi": 36.18,
+  "net_units": 7.34,
+  "roi": 26.21,
   "clv_pct": 0,
   "pod_wins": 0,
   "pod_losses": 0,
-  "streak": "W7",
+  "streak": "W1",
   "last_updated": "2026-03-21"
 }

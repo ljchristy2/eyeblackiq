@@ -90,6 +90,8 @@
   </div>
   <div class="filter-divider"></div>
   <div class="filter-group">
+    <button class="filter-btn" data-filter="type" data-val="PROPS" id="props-only-btn">⚡ Props</button>
+    <button class="filter-btn" data-filter="type" data-val="PICKEM" id="pickem-btn">Pick'ems</button>
     <button class="filter-btn" data-filter="pods" data-val="PODS_ONLY" id="pods-only-btn">📌 PODs Only</button>
   </div>
 </div>
@@ -127,6 +129,17 @@
     <div class="radar-list" id="radar-list" style="display:none;"></div>
   </section>
 
+  <!-- FULL MARKET VIEW -->
+  <section class="radar-section" id="fmv-section" style="display:none;">
+    <div class="radar-header" id="fmv-toggle" onclick="toggleFMV()">
+      <span class="radar-title">Full Market View</span>
+      <span class="radar-sub">All model outputs today — informational, no unit sizing</span>
+      <span class="radar-count" id="fmv-count">0</span>
+      <button class="radar-toggle-btn" id="fmv-btn">▼ Show</button>
+    </div>
+    <div class="radar-list" id="fmv-list" style="display:none;"></div>
+  </section>
+
   <!-- DISCLAIMER -->
   <div class="disclaimer">
     All picks shown at time of signal. Lines move — always verify current prices before acting.<br>
@@ -154,9 +167,10 @@
 
 <script>
 // ── Filter state ─────────────────────────────────────────────────────────────
-let filters = { sport: "ALL", tier: "ALL", pods: false };
+let filters = { sport: "ALL", tier: "ALL", pods: false, type: null };
 let slipData = null;
 let radarOpen = false;
+let fmvOpen = false;
 
 // ── Data loading ─────────────────────────────────────────────────────────────
 async function loadData() {
@@ -209,23 +223,35 @@ function confBadge(label, sym) {
   return `<span class="conf-badge ${cls}">${sym || label}</span>`;
 }
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function isPickem(odds) {
+  if (odds == null) return false;
+  const o = Number(odds);
+  return o >= -120 && o <= 120;
+}
+function isProp(market) {
+  return (market || '').toUpperCase() === 'PROPS';
+}
+
 // ── Pick card ─────────────────────────────────────────────────────────────────
 function pickCard(pick) {
-  const edge   = typeof pick.edge_pct !== 'undefined' ? pick.edge_pct : (pick.edge || 0) * 100;
-  const sign   = edge >= 0 ? '+' : '';
-  const tclass = tierClass(pick.tier || '');
+  const edge    = typeof pick.edge_pct !== 'undefined' ? pick.edge_pct : (pick.edge || 0) * 100;
+  const sign    = edge >= 0 ? '+' : '';
+  const tclass  = tierClass(pick.tier || '');
   const oddsRaw = pick.odds;
   const oddsStr = oddsRaw > 0 ? `+${oddsRaw}` : `${oddsRaw}`;
-  const units  = pick.units || 1.0;
-  const isPod  = pick.is_pod;
+  const units   = pick.units || 1.0;
+  const isPod   = pick.is_pod;
   const confHtml = confBadge(pick.conf_label, pick.conf_sym);
-  const rlHtml = pick.rl_alt
+  const rlHtml  = pick.rl_alt
     ? `<div class="pick-rl-alt">Consider spread (+1.5) as alternative vehicle</div>`
     : '';
   const gameHtml = pick.game
     ? `<div class="pick-game">${pick.game}${pick.game_time ? `  <span class="pick-time">${pick.game_time}</span>` : ''}</div>`
     : '';
-  const podTag = isPod ? `<span class="pod-crown">📌 POD</span>` : '';
+  const podTag    = isPod ? `<span class="pod-crown">📌 POD</span>` : '';
+  const propTag   = isProp(pick.market) ? `<span style="display:inline-block;font-size:9px;padding:1px 5px;background:#4A90D9;color:#000;font-weight:700;border-radius:2px;margin-left:4px;vertical-align:middle;">⚡ PROP</span>` : '';
+  const pickemTag = isPickem(pick.odds) ? `<span style="display:inline-block;font-size:9px;padding:1px 5px;background:#888;color:#fff;font-weight:700;border-radius:2px;margin-left:4px;vertical-align:middle;">PICK\'EM</span>` : '';
   const sportIcon = {NCAA:'⚾',MLB:'⚾',NHL:'🏒',SOCCER:'⚽'}[(pick.sport||'').toUpperCase()] || '📊';
   return `
   <div class="pick-card ${tclass}${isPod ? ' pod-highlight' : ''}">
@@ -237,7 +263,7 @@ function pickCard(pick) {
         ${podTag}
       </div>
     </div>
-    <div class="pick-side">${pick.side || pick.pick || '—'}</div>
+    <div class="pick-side">${pick.side || pick.pick || '—'}${propTag}${pickemTag}</div>
     <div class="pick-meta">
       <span class="pick-odds">${oddsStr}</span>
       <span class="pick-edge">Edge ${sign}${Number(edge).toFixed(1)}%</span>
@@ -295,8 +321,14 @@ function matchesPodFilter(pick) {
   if (!filters.pods) return true;
   return pick.is_pod;
 }
+function matchesTypeFilter(pick) {
+  if (!filters.type) return true;
+  if (filters.type === 'PROPS')  return isProp(pick.market);
+  if (filters.type === 'PICKEM') return isPickem(pick.odds);
+  return true;
+}
 function passesFilter(pick) {
-  return matchesSportFilter(pick) && matchesTierFilter(pick) && matchesPodFilter(pick);
+  return matchesSportFilter(pick) && matchesTierFilter(pick) && matchesPodFilter(pick) && matchesTypeFilter(pick);
 }
 
 function renderPicks() {
@@ -338,6 +370,19 @@ function renderPicks() {
   } else {
     if (radarSection) radarSection.style.display = 'none';
   }
+
+  // Full Market View — flagged picks (units=0)
+  const fmvSection = document.getElementById('fmv-section');
+  const fmvList    = document.getElementById('fmv-list');
+  const fmvCount   = document.getElementById('fmv-count');
+  const flagged    = slipData.flagged || [];
+  if (flagged.length > 0) {
+    fmvSection.style.display = 'block';
+    if (fmvCount) fmvCount.textContent = flagged.length;
+    if (fmvList)  fmvList.innerHTML = flagged.map(radarCard).join('');
+  } else {
+    if (fmvSection) fmvSection.style.display = 'none';
+  }
 }
 
 // ── Radar toggle ─────────────────────────────────────────────────────────────
@@ -349,6 +394,15 @@ function toggleRadar() {
   if (btn)  btn.textContent    = radarOpen ? '▲ Hide' : '▼ Show';
 }
 
+// ── FMV toggle ────────────────────────────────────────────────────────────────
+function toggleFMV() {
+  fmvOpen = !fmvOpen;
+  const list = document.getElementById('fmv-list');
+  const btn  = document.getElementById('fmv-btn');
+  if (list) list.style.display = fmvOpen ? 'flex' : 'none';
+  if (btn)  btn.textContent    = fmvOpen ? '▲ Hide' : '▼ Show';
+}
+
 // ── Filter button handlers ────────────────────────────────────────────────────
 document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -357,6 +411,11 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
     if (filterType === 'pods') {
       filters.pods = !filters.pods;
       btn.classList.toggle('active', filters.pods);
+    } else if (filterType === 'type') {
+      const isActive = btn.classList.contains('active');
+      document.querySelectorAll('.filter-btn[data-filter="type"]').forEach(b => b.classList.remove('active'));
+      if (!isActive) { btn.classList.add('active'); filters.type = val; }
+      else { filters.type = null; }
     } else {
       document.querySelectorAll(`.filter-btn[data-filter="${filterType}"]`).forEach(b => b.classList.remove('active'));
       btn.classList.add('active');

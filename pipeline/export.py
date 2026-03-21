@@ -222,26 +222,64 @@ def export_record() -> dict:
     }
 
 
-def export_results(limit: int = 10) -> list:
-    """Returns last N graded results, including loss analysis data."""
+TIER_COLORS = {
+    "FILTHY":       "#DC143C",
+    "SNIPE":        "#DC143C",
+    "UPPER 90":     "#DC143C",
+    "SCREAMER":     "#DC143C",
+    "WHEELHOUSE":   "#4A90D9",
+    "SLOT MACHINE": "#4A90D9",
+    "SLOT_MACHINE": "#4A90D9",
+    "CHEEKY":       "#4A90D9",
+    "FAST BREAK":   "#4A90D9",
+    "SCOUT":        "#B8960C",
+    "MONITOR":      "#B8960C",
+    "CONVICTION":   "#B8960C",
+    "ON_RADAR":     "#555555",
+    "ON RADAR":     "#555555",
+}
+
+
+def tier_color(tier: str) -> str:
+    """Returns hex color for a tier name."""
+    if not tier:
+        return "#555555"
+    t = tier.upper().replace("🟡 ", "").replace("🔴 ", "").strip()
+    for k, v in TIER_COLORS.items():
+        if k in t:
+            return v
+    return "#555555"
+
+
+def clean_tier(tier: str) -> str:
+    """Remove emoji prefixes from tier names."""
+    if not tier:
+        return tier
+    return tier.replace("🟡 ", "").replace("🔴 ", "").replace("🟢 ", "").strip()
+
+
+def export_results(limit: int = 200) -> list:
+    """Returns graded results (all recommended picks), including loss analysis data."""
     with get_conn() as conn:
         conn.row_factory = sqlite3.Row
         cur = conn.execute(
             """SELECT r.signal_date, r.sport, r.game, r.side, r.market,
                       r.odds, r.units, r.result, r.units_net,
                       r.actual_val, r.closing_line, r.clv, r.graded_at,
-                      s.notes, s.tier, s.ev
+                      s.notes, s.tier, s.ev, s.is_pod, s.pod_sport
                FROM results r
                LEFT JOIN signals s ON s.id = r.signal_id
                WHERE r.result IN ('WIN','LOSS','PUSH','VOID')
+                 AND (s.units IS NULL OR s.units > 0)
                ORDER BY r.signal_date DESC, r.id DESC
                LIMIT ?""",
             (limit,)
         )
         rows = [dict(r) for r in cur.fetchall()]
 
-    # Build loss_analysis text server-side for any LOSS row that has data
     for r in rows:
+        r["tier_color"] = tier_color(r.get("tier") or "")
+        r["tier"] = clean_tier(r.get("tier") or "")
         if r.get("result") in ("LOSS", "L"):
             parts = []
             actual = r.get("actual_val")
@@ -257,11 +295,97 @@ def export_results(limit: int = 10) -> list:
                 clv_pct = r["clv"] * 100
                 parts.append(f"CLV: {'+' if clv_pct >= 0 else ''}{clv_pct:.1f}%")
             if r.get("notes"):
-                # Strip internal model notes to surface only meaningful context
-                note = (r["notes"] or "").split("  Conf=")[0]  # trim confidence suffix
+                note = (r["notes"] or "").split("  Conf=")[0]
                 if note:
                     parts.append(note)
             r["loss_analysis"] = "  ·  ".join(parts) if parts else None
+    return rows
+
+
+def export_daily_summaries() -> list:
+    """Builds per-date running record from results table."""
+    with get_conn() as conn:
+        cur = conn.execute(
+            """SELECT signal_date,
+                      SUM(CASE WHEN result='WIN'  THEN 1 ELSE 0 END) as day_w,
+                      SUM(CASE WHEN result='LOSS' THEN 1 ELSE 0 END) as day_l,
+                      SUM(CASE WHEN result='PUSH' THEN 1 ELSE 0 END) as day_p,
+                      ROUND(SUM(units_net), 3) as day_net,
+                      SUM(units) as day_units_risked
+               FROM results
+               WHERE result IN ('WIN','LOSS','PUSH')
+               GROUP BY signal_date
+               ORDER BY signal_date ASC"""
+        )
+        day_rows = cur.fetchall()
+
+    summaries = []
+    season_w = season_l = season_p = 0
+    season_net = 0.0
+    season_units = 0.0
+    streak_type = None
+    streak_n = 0
+
+    for row in day_rows:
+        date, dw, dl, dp, dn, du = row
+        season_w += dw or 0
+        season_l += dl or 0
+        season_p += dp or 0
+        season_net += dn or 0
+        season_units += du or 0
+        roi = round((season_net / season_units * 100) if season_units > 0 else 0, 1)
+
+        # Streak logic
+        if dw > 0 and dl == 0:
+            day_result = "W"
+        elif dl > 0 and dw == 0:
+            day_result = "L"
+        else:
+            day_result = "M"  # mixed day
+
+        if streak_type is None or day_result == streak_type:
+            streak_type = day_result
+            streak_n += 1
+        else:
+            streak_type = day_result
+            streak_n = 1
+
+        streak_str = f"{streak_type}{streak_n}" if streak_type in ("W", "L") else f"M{streak_n}"
+
+        summaries.append({
+            "date":       date,
+            "day_w":      dw or 0,
+            "day_l":      dl or 0,
+            "day_p":      dp or 0,
+            "day_net":    round(dn or 0, 3),
+            "season_w":   season_w,
+            "season_l":   season_l,
+            "season_p":   season_p,
+            "season_net": round(season_net, 3),
+            "season_roi": roi,
+            "streak":     streak_str,
+        })
+    return summaries
+
+
+def export_pod_picks(limit: int = 100) -> list:
+    """Returns all graded POD picks."""
+    with get_conn() as conn:
+        conn.row_factory = sqlite3.Row
+        cur = conn.execute(
+            """SELECT r.signal_date as date, r.sport, r.side as pick,
+                      r.odds as line, r.units, r.result, r.units_net as net_units,
+                      r.actual_val, s.tier, s.ev
+               FROM results r
+               LEFT JOIN signals s ON s.id = r.signal_id
+               WHERE s.is_pod = 1 AND r.result IN ('WIN','LOSS','PUSH','VOID')
+               ORDER BY r.signal_date DESC
+               LIMIT ?""",
+            (limit,)
+        )
+        rows = [dict(r) for r in cur.fetchall()]
+    for r in rows:
+        r["tier"] = clean_tier(r.get("tier") or "")
     return rows
 
 
@@ -277,17 +401,24 @@ def run_export(date_str: str):
     """Main export — writes all three JSON files."""
     DOCS_DATA.mkdir(parents=True, exist_ok=True)
 
-    slip    = export_today_slip(date_str)
-    record  = export_record()
-    picks   = export_results(50)   # expanded limit for full results page
+    slip       = export_today_slip(date_str)
+    record     = export_record()
+    picks      = export_results(200)
+    summaries  = export_daily_summaries()
+    pod_picks  = export_pod_picks(100)
 
     write_json(DOCS_DATA / "today_slip.json", slip)
     write_json(DOCS_DATA / "record.json",     record)
-    write_json(DOCS_DATA / "results.json",    {"picks": picks, "daily_summaries": [], "pod_picks": []})
+    write_json(DOCS_DATA / "results.json",    {
+        "picks":           picks,
+        "daily_summaries": summaries,
+        "pod_picks":       pod_picks,
+    })
 
     logger.info(
         f"Export complete — {slip['counts']['recommended']} recommended, "
-        f"{slip['counts']['flagged']} flagged, {slip['counts']['pods']} PODs"
+        f"{slip['counts']['flagged']} flagged, {slip['counts']['pods']} PODs | "
+        f"{len(picks)} total graded picks, {len(summaries)} day summaries"
     )
     return slip, record, picks
 
